@@ -50,7 +50,6 @@ import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kV;
 /*
  * Simple mecanum drive hardware implementation for REV hardware.
  */
-@Config
 public class MecanumDriveImpl extends MecanumDrive {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 1);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(10, 0, 0);

@@ -35,7 +35,7 @@ public class Drive extends LinearOpMode {
 
     private boolean virgin = true;
 
-    public static final boolean USING_ROARDUNNER = true;
+    public static final boolean USING_ROADRUNNER = true;
     Pose2d startPose = new Pose2d(-40.085, -63.54, radians(270.0));
     Pose2d shippingHubPose = new Pose2d(-9.0 - 0.5 , -48.0 + 1.7, radians(265.0));
 
@@ -65,7 +65,7 @@ public class Drive extends LinearOpMode {
 
         virgin = true;
 
-        if (USING_ROARDUNNER) {
+        if (USING_ROADRUNNER) {
             Pose2d storedPose = PoseStorage.currentPose;
             drive.setPoseEstimate(storedPose);
             if (PoseStorage.currentPose.getX() == 0 && PoseStorage.currentPose.getY() == 0) {
@@ -83,6 +83,7 @@ public class Drive extends LinearOpMode {
         while (opModeIsActive()) {
             controller1.update();
             controller2.update();
+
             intake.update();
             lifter.update();
             drive.update();
@@ -90,13 +91,22 @@ public class Drive extends LinearOpMode {
 //            telemetry.addData("Ticks", lifter.getLifterPosition());
 //            telemetry.addData("Vel", lifter.lifterMotor.getVelocity());
 
+
+            //Base End Gae Pos
+            if(controller1.XOnce()){
+                baseServoPosition = 0.1;
+                angleServoPosition = 0.1;
+                turret.angleServo.setPosition(0.1);
+                turret.baseServo.setPosition(0.1);
+            }
+
             //Intake servos
             if (controller2.dpadDownOnce()) {
                 intake.lowerIntake();
             }
             if (controller2.dpadUpOnce()) {
                 intake.raiseIntake();
-                intake.stopIntake();
+                intake.stopIntake(100);
             }
 
             //Intake Motor
@@ -121,12 +131,12 @@ public class Drive extends LinearOpMode {
             if (controller2.YOnce()) {
 //                start or stop duck motor
 //                ----trebuie verificata pozitia lifetrului-----
-                if(virgin) {
-                    turret.baseServo.setPosition(0.1);
-                    baseServoPosition = 0.1;
-                    turret.angleServo.setPosition(0.08);
-                    angleServoPosition = 0.08;
-                }
+//                if(virgin) {
+//                    turret.baseServo.setPosition(0.1);
+//                    baseServoPosition = 0.1;
+//                    turret.angleServo.setPosition(0.08);
+//                    angleServoPosition = 0.08;
+//                }
                 if (duckMechanism.running) {
                     duckMechanism.stopSpin();
                 } else duckMechanism.startSpin();
@@ -155,13 +165,13 @@ public class Drive extends LinearOpMode {
 
             if (controller1.dpadUp()) {
                 //move angle up
-                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 0.45);
+                angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 1.00);
                 turret.setAnglePos(angleServoPosition);
             }
 
             if (controller1.dpadDown()) {
                 //move angle down
-                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 0.45);
+                angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 1.00);
                 turret.setAnglePos(angleServoPosition);
             }
 
@@ -199,7 +209,7 @@ public class Drive extends LinearOpMode {
 
                     drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
 
-                    if (controller1.YOnce() && USING_ROARDUNNER) {
+                    if (controller1.YOnce() && USING_ROADRUNNER) {
                         //generate a spline and follow it
                         Trajectory trajectory = drive.trajectoryBuilder(drive.getPoseEstimate()).lineToLinearHeading(shippingHubPose).build();
                         intake.raiseIntake();
@@ -211,12 +221,12 @@ public class Drive extends LinearOpMode {
 
                     break;
                 case AUTOMATIC_CONTROL:
-                    if (controller1.BOnce() && USING_ROARDUNNER) {
+                    if (controller1.BOnce() && USING_ROADRUNNER) {
                         //cancel following
                         drive.breakFollowing();
                     }
 
-                    if (!drive.isBusy() && USING_ROARDUNNER) {
+                    if (!drive.isBusy() && USING_ROADRUNNER) {
                         //give control back to drivers
                         currentMode = Mode.DRIVER_CONTROL;
                     }

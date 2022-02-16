@@ -25,7 +25,6 @@ import java.util.List;
  *    \--------------/
  *
  */
-@Config
 public class TrackingWheelLocalizerImpl extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
     public static double WHEEL_RADIUS = 1; // in

@@ -200,7 +200,7 @@ public class AutoRemote extends LinearOpMode {
         return drive.trajectorySequenceBuilder(startPose)
                 .UNSTABLE_addTemporalMarkerOffset(0.4, () -> duckMechanism.startSpin())
                 .setVelConstraint(new TranslationalVelocityConstraint(40.0))
-                .lineToLinearHeading(new Pose2d(-55.23, -59.0, radians(270.0)))
+                .lineToLinearHeading(new Pose2d(-55.3, -59.0, radians(270.0)))
                 .waitSeconds(0.7)
                 .build();
     }

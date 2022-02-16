@@ -20,12 +20,12 @@ public class Intake {
     public Servo rightServo;
     public Servo intakeServo;
 
-    public DistanceSensor distanceSensor;
-    //public Rev2mDistanceSensor distanceSensor;
+    //public DistanceSensor distanceSensor;
+    public Rev2mDistanceSensor distanceSensor;
     private volatile double rawDistance;
     public volatile boolean enableWatchdog = true;
 
-    public static double DISTANCE_THRESHOLD = 6; //4
+    public static double DISTANCE_THRESHOLD = 4; //4 // best6
     public static long WATCHDOG_DELAY = 2000; //ms
     public ElapsedTime timer;
 
@@ -51,7 +51,7 @@ public class Intake {
         intake.setPower(0.0);
         intake.setDirection(DcMotorEx.Direction.FORWARD);
 
-        //distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
+        distanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor");
         timer = new ElapsedTime();
 
         initIntake();
@@ -61,7 +61,8 @@ public class Intake {
     public void update() {
         if (!enableWatchdog) return;
         rawDistance = distanceSensor.getDistance(DistanceUnit.CM);
-        //telemetry.addData("Distance", rawDistance);
+
+
         if (timer.milliseconds() < WATCHDOG_DELAY) return;
 
         if (rawDistance < DISTANCE_THRESHOLD && rawDistance != 0.0) {
@@ -127,6 +128,8 @@ public class Intake {
                     e.printStackTrace();
                 }
             }
+            telemetry.addData("Distance", rawDistance);
+            telemetry.update();
             stopIntake();
         }).start();
     }

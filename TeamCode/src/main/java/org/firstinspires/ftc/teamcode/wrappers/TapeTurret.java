@@ -17,7 +17,7 @@ public class TapeTurret {
         extender.setPower(0.0);
 
         angleServo.setPosition(0.0); //default 0, max 0.25
-        baseServo.setPosition(1.0); // default 1.0 , min 0.35, max 0.85
+        baseServo.setPosition(0.85); // default 1.0 , min 0.35, max 0.85
     }
 
     public void startExtend() {
