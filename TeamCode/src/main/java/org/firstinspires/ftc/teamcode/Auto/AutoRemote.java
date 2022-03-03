@@ -38,7 +38,7 @@ public class AutoRemote extends LinearOpMode {
     Pose2d shippingHubPose = new Pose2d(-9.0 + 2.0, -48.0 + 1.12, radians(260.0));
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         deleteCache(AppUtil.getDefContext());
 

@@ -30,11 +30,14 @@ public class Intake {
     public ElapsedTime timer;
 
     public double velocity = 1000;
-
+    public static boolean intakeUp = true;
+    public static boolean intakeIsWorking = false;
 
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
     private Gamepad gamepad;
+
+
 
     public Intake(HardwareMap hardwareMap, Telemetry telemetry, Gamepad gamepad) {
         this.hardwareMap = hardwareMap;
@@ -53,6 +56,9 @@ public class Intake {
 
         distanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor");
         timer = new ElapsedTime();
+
+        intakeUp = true;
+        intakeIsWorking = false;
 
         initIntake();
         timer.reset();
@@ -85,21 +91,25 @@ public class Intake {
     }
 
     public void raiseIntake() {
+        intakeUp = true;
         setIntakePosition(0.48);
         releaseElements();
     }
 
     public void lowerIntake() {
-        setIntakePosition(0.15);
+        intakeUp = false;
+        setIntakePosition(0.169);
         blockElements();
     }
 
     public void startIntake() {
         intake.setVelocity(velocity * direction);
+        intakeIsWorking = true;
     }
 
     public void stopIntake() {
         intake.setVelocity(0.0);
+        intakeIsWorking = false;
     }
 
     public void startIntake(long wait) {

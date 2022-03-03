@@ -71,7 +71,7 @@ public class Lifter {
     }
 
     public void closeBox() {
-        dumpingBox.setPosition(0.2);
+        dumpingBox.setPosition(0.27);
     }
 
     public void openBox(long wait) {
@@ -103,7 +103,21 @@ public class Lifter {
             closeBox();
         }).start();
     }
+//
+    public void waitGoToBoxPosition(long wait, double pos){
+        new Thread(() -> {
+            if (Thread.currentThread().isInterrupted()) return; //paranoia
 
+            if (wait != 0) {
+                try {
+                    Thread.sleep(wait);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            dumpingBox.setPosition(pos);
+        }).start();
+    }
 
     public void intermediateBoxPosition() {
         dumpingBox.setPosition(0.5);

@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -34,6 +35,7 @@ public class Drive extends LinearOpMode {
     private double triggerPow = 0.1;
 
     private boolean virgin = true;
+    public static int forward = 1;
 
     public static final boolean USING_ROADRUNNER = true;
     Pose2d startPose = new Pose2d(-40.085, -63.54, radians(270.0));
@@ -48,6 +50,7 @@ public class Drive extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
 
         AutoRemote.deleteCache(AppUtil.getDefContext());
 
@@ -64,6 +67,7 @@ public class Drive extends LinearOpMode {
         telemetry.update();
 
         virgin = true;
+        forward = 1;
 
         if (USING_ROADRUNNER) {
             Pose2d storedPose = PoseStorage.currentPose;
@@ -88,37 +92,78 @@ public class Drive extends LinearOpMode {
             lifter.update();
             drive.update();
 
-//            telemetry.addData("Ticks", lifter.getLifterPosition());
-//            telemetry.addData("Vel", lifter.lifterMotor.getVelocity());
+            ///---------1. FIRST CONTROLLER--------
 
-
-            //Base End Gae Pos
-            if(controller1.XOnce()){
-                baseServoPosition = 0.1;
-                angleServoPosition = 0.1;
-                turret.angleServo.setPosition(0.1);
-                turret.baseServo.setPosition(0.1);
+            //--BASE END GAME auto--
+            if(controller1.AOnce() && !gamepad1.start){
+                if(lifter.getLifterPosition() < 250) {
+                    baseServoPosition = 0.1;
+                    angleServoPosition = 0.1;
+                    turret.angleServo.setPosition(0.1);
+                    turret.baseServo.setPosition(0.1);
+                }
             }
 
+            //--WHEEL DIRECTION--
+            if(controller1.rightBumperOnce()) {changeDirection();}
+            if(controller1.leftBumperOnce()){intakeIsFront();}
+
+            //--DUCK MECHANISM--
+            if(controller1.YOnce()){
+                if (duckMechanism.running) {
+                    duckMechanism.stopSpin();
+                } else duckMechanism.startSpin();
+            }
+
+            //--LIL' FORWARD--
+            if(controller1.left_trigger>0.05){
+                triggerPow = controller1.left_trigger * powCoeff * forward;
+                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
+            }
+
+            if(controller1.right_trigger>0.05){
+                triggerPow = controller1.right_trigger * -powCoeff * forward;
+                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
+            }
+
+            //-----------------------------------
+
+
+            ///---------2. SECOND CONTROLLER--------
+
+            //--INTAKE--
             //Intake servos
-            if (controller2.dpadDownOnce()) {
-                intake.lowerIntake();
-            }
-            if (controller2.dpadUpOnce()) {
-                intake.raiseIntake();
-                intake.stopIntake(100);
+            if(controller2.YOnce()){
+                if(Intake.intakeUp){
+                    intake.lowerIntake();
+                }else{
+                    intake.raiseIntake();
+                    intake.stopIntake(100);
+                }
             }
 
             //Intake Motor
             if (controller2.AOnce() && !gamepad2.start) {
-                intake.lowerIntake();
-                if (intake.direction == -1) {
-                    intake.reverseIntake();
-                }
-                intake.startIntake(100);
+                if(!Intake.intakeIsWorking){
+                    intake.lowerIntake();
+                    if (intake.direction == -1) {
+                        intake.reverseIntake();
+                    }
+                    intake.startIntake(100);
+                }else intake.stopIntake();
             }
+
+            //for shared shipping hub
             if (controller2.BOnce() && !gamepad2.start) {
-                intake.stopIntake();
+                turret.setAnglePos(0);
+                turret.setBasePos(0.98);
+                lifter.goToPosition(100, 21500);
+                intake.setIntakePosition(0.4);
+                lifter.waitGoToBoxPosition(600,0.85);
+                //lifter.depositMineral(600);
+                lifter.closeBox(1200);
+                lifter.goToPosition(1500, Lifter.LEVEL.DOWN.ticks);
+                intake.raiseIntake(1800);
             }
             if (controller2.XOnce()) {
                 intake.stopIntake();
@@ -127,89 +172,66 @@ public class Drive extends LinearOpMode {
                 intake.startIntake();
             }
 
-            //Duck Mechanism
-            if (controller2.YOnce()) {
-//                start or stop duck motor
-//                ----trebuie verificata pozitia lifetrului-----
-//                if(virgin) {
-//                    turret.baseServo.setPosition(0.1);
-//                    baseServoPosition = 0.1;
-//                    turret.angleServo.setPosition(0.08);
-//                    angleServoPosition = 0.08;
-//                }
-                if (duckMechanism.running) {
-                    duckMechanism.stopSpin();
-                } else duckMechanism.startSpin();
-            }
-
-            //Tape Mechanism
-            if (controller1.rightBumper()) {
+            //--TAPE MECHANISM--
+            if (controller2.right_trigger > 0.1) {
                 turret.startExtend();
-            } else if (controller1.leftBumper()) {
+            } else if (controller2.left_trigger > 0.1) {
                 turret.startRetract();
             } else turret.stop();
 
             //Base servo limits: 0--right ; left--1
 
-            if (controller1.dpadLeft()) {
+            if (controller2.dpadLeft()) {
                 //move base left
                 baseServoPosition = Range.clip(baseServoPosition + deltaBase, 0, 1.00);
                 turret.setBasePos(baseServoPosition);
             }
 
-            if (controller1.dpadRight()) {
+            if (controller2.dpadRight()) {
                 //move base right
                 baseServoPosition = Range.clip(baseServoPosition - deltaBase, 0, 1.00);
                 turret.setBasePos(baseServoPosition);
             }
 
-            if (controller1.dpadUp()) {
+            if (controller2.dpadUp()) {
                 //move angle up
                 angleServoPosition = Range.clip(angleServoPosition + deltaAngle, 0, 1.00);
                 turret.setAnglePos(angleServoPosition);
             }
 
-            if (controller1.dpadDown()) {
+            if (controller2.dpadDown()) {
                 //move angle down
                 angleServoPosition = Range.clip(angleServoPosition - deltaAngle, 0, 1.00);
                 turret.setAnglePos(angleServoPosition);
             }
 
-            //-----LIFTER-----
-            if (controller2.rightBumperOnce()) {
+            //--LIFTER--
+            if (controller2.rightBumperOnce()&& !controller2.leftBumperOnce()) {
                 turret.setBasePos(0.98);
-                lifter.goToPosition(0, Lifter.LEVEL.THIRD.ticks);
-                lifter.intermediateBoxPosition(200);
-                lifter.depositMineral(500);
-                lifter.goToPosition(1500, Lifter.LEVEL.DOWN.ticks);
+                lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                lifter.intermediateBoxPosition(300);
+                lifter.depositMineral(600);
+                lifter.goToPosition(1600, Lifter.LEVEL.DOWN.ticks);
             }
 
-            if (controller2.leftBumperOnce()) {
+            if (controller2.leftBumperOnce() && !controller2.rightBumperOnce()) {
+                turret.setBasePos(0.98);
                 lifter.closeBox();
                 lifter.goToPosition(0, Lifter.LEVEL.DOWN.ticks);
             }
 
-            //----- LIL' FORWARD----
-
-            if(controller1.left_trigger>0.05){
-                triggerPow = controller1.left_trigger * powCoeff;
-                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
-            }
-
-            if(controller1.right_trigger>0.05){
-                triggerPow = controller1.right_trigger * -powCoeff;
-                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
-            }
+            //-----------------------------------
 
             switch (currentMode) {
                 case DRIVER_CONTROL:
-                    double leftStickY = -controller1.left_stick_y;
-                    double leftStickX = -controller1.left_stick_x;
-                    double rotation = -controller1.right_stick_x;
+                    double leftStickY = -controller1.left_stick_y ;
+                    double leftStickX = -controller1.left_stick_x ;
+                    double rotation = -controller1.right_stick_x * forward ;
+
 
                     drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
 
-                    if (controller1.YOnce() && USING_ROADRUNNER) {
+                    if (controller1.XOnce() && USING_ROADRUNNER) {
                         //generate a spline and follow it
                         Trajectory trajectory = drive.trajectoryBuilder(drive.getPoseEstimate()).lineToLinearHeading(shippingHubPose).build();
                         intake.raiseIntake();
@@ -233,30 +255,40 @@ public class Drive extends LinearOpMode {
                     break;
             }
 
-            //telemetry.update();
-
-            //-----------MANUAL CONTROL---------------
-//            double lifterUp = controller2.right_trigger;
-//            double lifterDown = controller2.left_trigger;
-//
-//            if (lifterUp > 0 && lifterDown == 0) {
-//                //go up
-//                lifter.setLifterPower(-lifterUp * 0.7);
-//            } else {
-//                if (lifterDown > 0 && lifterUp == 0) {
-//                    //go down
-//                    lifter.setLifterPower(lifterDown * 0.2);
-//                } else {
-//                    //stop
-//                    lifter.setLifterPower(0.0);
-//                }
-//            }
         }
 
         PoseStorage.currentPose = new Pose2d(0,0); //reset pose storage
+
+    }
+
+    private void changeDirection(){
+        if (forward == -1){
+            drive.setMotorPowers(0,0,0,0);
+            MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
+            MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
+            MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.FORWARD);
+            MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);
+            forward = 1;
+        }else{
+            drive.setMotorPowers(0,0,0,0);
+            MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.FORWARD);
+            MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.FORWARD);
+            MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.REVERSE);
+            MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.REVERSE);
+            forward = -1;
+        }
+    }
+
+    private void intakeIsFront(){
+        forward = 1;
+        MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
+        MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
+        MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.FORWARD);
+        MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);
     }
 
     static double radians(double deg) {
         return Math.toRadians(deg);
     }
+
 }
