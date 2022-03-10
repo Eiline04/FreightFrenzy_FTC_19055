@@ -3,14 +3,14 @@ package org.firstinspires.ftc.teamcode.roadrunner.drive;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-
+@Config
 public class DriveConstants {
 
     /*
      * These are motor constants that should be listed online for your motors.
      */
-    public static final double TICKS_PER_REV = 1;
-    public static final double MAX_RPM = 435.0;
+    public static final double TICKS_PER_REV = 537.7; //1
+    public static final double MAX_RPM = 312.0;
 
     /*
      * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
@@ -32,9 +32,9 @@ public class DriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
-    public static double WHEEL_RADIUS = 1.88976; // in
+    public static double WHEEL_RADIUS = 1.889764; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 14.8; // in //10.5 actual value
+    public static double TRACK_WIDTH = 10.2362; // in //10.5 actual value // 14.8
 
 
     /*
@@ -43,8 +43,8 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 0.0175;
-    public static double kA = 0.0045;
+    public static double kV = 0.022;
+    public static double kA = 0.0043;
     public static double kStatic = 0.01;
 
     /*
@@ -54,10 +54,10 @@ public class DriveConstants {
      * small and gradually increase them later after everything is working. All distance units are
      * inches.
      */
-    public static double MAX_VEL = 45;
-    public static double MAX_ACCEL = 45;
-    public static double MAX_ANG_VEL = Math.toRadians(400);
-    public static double MAX_ANG_ACCEL = Math.toRadians(400);
+    public static double MAX_VEL = 55;
+    public static double MAX_ACCEL = 55;
+    public static double MAX_ANG_VEL = Math.toRadians(180);
+    public static double MAX_ANG_ACCEL = Math.toRadians(180);
 
 
     public static double encoderTicksToInches(double ticks) {

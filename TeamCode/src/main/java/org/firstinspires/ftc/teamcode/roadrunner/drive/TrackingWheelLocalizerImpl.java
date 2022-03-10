@@ -25,13 +25,17 @@ import java.util.List;
  *    \--------------/
  *
  */
+@Config
 public class TrackingWheelLocalizerImpl extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 1; // in
+    public static double WHEEL_RADIUS = 0.98;
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 10.31; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -4.92; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 10.109833; // in; distance between the left and right wheels //10.2362 real value//last value 10.3311
+    public static double FORWARD_OFFSET = -4.9212; // in; offset of the lateral wheel
+
+    public static double X_MULTIPLIER = 1.0; //last 1.0003520
+    public static double Y_MULTIPLIER = 1.0;//1.0021863
 
     private Encoder leftEncoder, rightEncoder, frontEncoder;
 
@@ -59,9 +63,9 @@ public class TrackingWheelLocalizerImpl extends ThreeTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(leftEncoder.getCurrentPosition()),
-                encoderTicksToInches(rightEncoder.getCurrentPosition()),
-                encoderTicksToInches(frontEncoder.getCurrentPosition())
+                encoderTicksToInches(leftEncoder.getCurrentPosition()) * X_MULTIPLIER,
+                encoderTicksToInches(rightEncoder.getCurrentPosition()) * X_MULTIPLIER,
+                encoderTicksToInches(frontEncoder.getCurrentPosition()) * Y_MULTIPLIER
         );
     }
 
@@ -70,9 +74,9 @@ public class TrackingWheelLocalizerImpl extends ThreeTrackingWheelLocalizer {
     public List<Double> getWheelVelocities() {
 
         return Arrays.asList(
-                encoderTicksToInches(leftEncoder.getCorrectedVelocity()),
-                encoderTicksToInches(rightEncoder.getCorrectedVelocity()),
-                encoderTicksToInches(frontEncoder.getCorrectedVelocity())
+                encoderTicksToInches(leftEncoder.getCorrectedVelocity()) * X_MULTIPLIER,
+                encoderTicksToInches(rightEncoder.getCorrectedVelocity()) * X_MULTIPLIER,
+                encoderTicksToInches(frontEncoder.getCorrectedVelocity()) * Y_MULTIPLIER
         );
     }
 }

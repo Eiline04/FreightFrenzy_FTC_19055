@@ -20,21 +20,13 @@ import static org.firstinspires.ftc.teamcode.Drive.radians;
  */
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
-
-    Pose2d startPose = new Pose2d(-40.085, -63.54, radians(270.0));
-    Intake intake;
-
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
 
-        intake = new Intake(hardwareMap,telemetry, null);
-        intake.initIntake();
-
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        drive.setPoseEstimate(startPose);
+
         waitForStart();
-        intake.raiseIntake();
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(
@@ -50,7 +42,7 @@ public class LocalizationTest extends LinearOpMode {
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
-            telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
+            telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.update();
         }
     }

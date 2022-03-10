@@ -81,7 +81,7 @@ public class Drive extends LinearOpMode {
 
         waitForStart();
         intake.raiseIntake();
-        baseServoPosition = 1.0;
+        baseServoPosition = 0.85;
         angleServoPosition = 0.0;
 
         while (opModeIsActive()) {
@@ -173,10 +173,14 @@ public class Drive extends LinearOpMode {
             }
 
             //--TAPE MECHANISM--
+            double tapeExtendCoeff = 0.9;
+            double tapeRetractCoeff = 0.6;
             if (controller2.right_trigger > 0.1) {
-                turret.startExtend();
+                //turret.startExtend();
+                turret.extender.setPower(Range.clip(controller2.right_trigger,0,1));
             } else if (controller2.left_trigger > 0.1) {
-                turret.startRetract();
+                turret.extender.setPower(Range.clip(-controller2.left_trigger,-1,0) * tapeRetractCoeff);
+                //turret.startRetract();
             } else turret.stop();
 
             //Base servo limits: 0--right ; left--1
@@ -224,9 +228,9 @@ public class Drive extends LinearOpMode {
 
             switch (currentMode) {
                 case DRIVER_CONTROL:
-                    double leftStickY = -controller1.left_stick_y ;
-                    double leftStickX = -controller1.left_stick_x ;
-                    double rotation = -controller1.right_stick_x * forward ;
+                    double leftStickY = -controller1.left_stick_y * forward;
+                    double leftStickX = -controller1.left_stick_x * forward;
+                    double rotation = -controller1.right_stick_x;
 
 
                     drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
@@ -262,7 +266,7 @@ public class Drive extends LinearOpMode {
     }
 
     private void changeDirection(){
-        if (forward == -1){
+        /*if (forward == -1){
             drive.setMotorPowers(0,0,0,0);
             MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
             MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
@@ -276,15 +280,16 @@ public class Drive extends LinearOpMode {
             MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.REVERSE);
             MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.REVERSE);
             forward = -1;
-        }
+        }*/
+        forward *= -1;
     }
 
     private void intakeIsFront(){
         forward = 1;
-        MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
+        /*MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
         MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
         MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.FORWARD);
-        MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);
+        MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);*/
     }
 
     static double radians(double deg) {
