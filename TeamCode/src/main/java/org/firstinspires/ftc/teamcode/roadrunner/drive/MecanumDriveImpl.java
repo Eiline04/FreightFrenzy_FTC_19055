@@ -52,8 +52,8 @@ import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kV;
  * Simple mecanum drive hardware implementation for REV hardware.
  */
 public class MecanumDriveImpl extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(5.7, 0, 0.5);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8.5, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1.8;
 
@@ -78,7 +78,8 @@ public class MecanumDriveImpl extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                new Pose2d(0.3, 0.3, Math.toRadians(3.0)), 1.0);
+        //max 0.3 inch position and 3 deg heading admissible error
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 

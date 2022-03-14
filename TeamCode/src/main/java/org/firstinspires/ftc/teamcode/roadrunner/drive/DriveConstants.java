@@ -34,7 +34,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.889764; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 10.2362; // in //10.5 actual value // 14.8
+    public static double TRACK_WIDTH = 10.79; // in //10.5 actual value // 14.8
 
 
     /*
@@ -56,8 +56,8 @@ public class DriveConstants {
      */
     public static double MAX_VEL = 55;
     public static double MAX_ACCEL = 55;
-    public static double MAX_ANG_VEL = Math.toRadians(180);
-    public static double MAX_ANG_ACCEL = Math.toRadians(180);
+    public static double MAX_ANG_VEL = 7.07; //834.130 IN GRADE!!
+    public static double MAX_ANG_ACCEL = 7.07;
 
 
     public static double encoderTicksToInches(double ticks) {
