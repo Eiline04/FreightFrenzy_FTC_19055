@@ -59,6 +59,7 @@ public class Intake {
 
         intakeUp = true;
         intakeIsWorking = false;
+        direction = 1;
 
         initIntake();
         timer.reset();
@@ -110,6 +111,11 @@ public class Intake {
     public void stopIntake() {
         intake.setVelocity(0.0);
         intakeIsWorking = false;
+    }
+
+    public void startIntakeVel(double velocity){
+        intake.setVelocity(velocity * direction);
+        intakeIsWorking = true;
     }
 
     public void startIntake(long wait) {

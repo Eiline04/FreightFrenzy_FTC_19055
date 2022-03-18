@@ -31,7 +31,7 @@ public class RedCarouselAuto extends LinearOpMode {
     Lifter.LEVEL result;
 
     static Pose2d startRedCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
-    static Pose2d redCShippingHubPose = new Pose2d(-27.0, -36.5, Math.toRadians(220.0));
+    static Pose2d redCShippingHubPose = new Pose2d(-13.0, -45.5, Math.toRadians(260.0));
     static Pose2d carouselPose = new Pose2d(-54.3, -59.0, radians(270.0));
 
     @Override
@@ -62,57 +62,68 @@ public class RedCarouselAuto extends LinearOpMode {
 
         TrajectorySequence carouselAuto =
                 drive.trajectorySequenceBuilder(startRedCarouselPose)
+                        //SPIN DUCK
+                        .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
+                            duckMechanism.startSpin();
+                        })
+                        .lineToLinearHeading(carouselPose)
+                        .waitSeconds(0.8)
+
                         //DELIVER PRELOAD
-                        .setVelConstraint(new TranslationalVelocityConstraint(55.0))
                         .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
                             lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
                             lifter.intermediateBoxPosition(300);
                         })
-                        .UNSTABLE_addTemporalMarkerOffset(0.95, () -> {
+                        .UNSTABLE_addTemporalMarkerOffset(2.5, () -> {
                             lifter.depositMineral(0);
                             lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
                         })
-                        .lineToLinearHeading(redCShippingHubPose)
 
-                        .resetVelConstraint()
-
-                        .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            duckMechanism.startSpin();
-                        })
-
-                        //spin DUCK
-                        .lineToLinearHeading(carouselPose)
-                        .waitSeconds(0.8)
-
-                        //COLLECT DUCK
-                        .UNSTABLE_addTemporalMarkerOffset(0.4, () -> { //1
-                            duckMechanism.stopSpin();
-                            intake.startIntake();
+                        .UNSTABLE_addTemporalMarkerOffset(0.4, ()->{
+                            intake.startIntakeVel(800);
                             intake.lowerIntake();
 
                         })
 
-                        .setVelConstraint(new TranslationalVelocityConstraint(15.0))
                         .setReversed(true)
-                        .splineToSplineHeading(new Pose2d(-27.8, -47.0, Math.toRadians(300.0)),Math.toRadians(10.0))
-                        .setVelConstraint(new TranslationalVelocityConstraint(5.0))
+                        .splineToSplineHeading(redCShippingHubPose, Math.toRadians(65.0))
                         .setReversed(false)
 
-                        .splineToSplineHeading(new Pose2d(-35.5, -56.5, Math.toRadians(270.0)), Math.toRadians(200.0))//265
-                        .resetAccelConstraint()
-                        /*//working one
-                        .splineToSplineHeading(new Pose2d(-27.8, -47.0, Math.toRadians(270.0)),Math.toRadians(200.0))
-                        .setVelConstraint(new TranslationalVelocityConstraint(5.0))
-                        .splineToSplineHeading(new Pose2d(-28.5, -55.5, Math.toRadians(270.0)), Math.toRadians(300.0))//265
-                        .resetAccelConstraint()
+                        //COLLECT DUCK
+                        .setVelConstraint(new TranslationalVelocityConstraint(20.0))
+                        .splineToSplineHeading(new Pose2d(-24.8, -55.0, Math.toRadians(255.0)),Math.toRadians(180.0))//270
+                        .setVelConstraint(new TranslationalVelocityConstraint(8.0))
+                        .addTemporalMarker(()->{
+                            duckMechanism.stopSpin();
+                        })
+                        .splineToSplineHeading(new Pose2d(-35.5, -56.5, Math.toRadians(240.0)), Math.toRadians(180.0))
+                        .splineToSplineHeading(new Pose2d(-40.5, -55.5, Math.toRadians(250.0)), Math.toRadians(30.0))
+                        .splineToSplineHeading(new Pose2d(-55.5, -53.4, Math.toRadians(240.0)), Math.toRadians(180.0))
+                        .resetVelConstraint()
 
-                        .splineToSplineHeading(new Pose2d(-40.5, -50.5, Math.toRadians(270.0)), Math.toRadians(90.0))//265
 
-                        .setVelConstraint(new TranslationalVelocityConstraint(5.0))
-                        .splineToSplineHeading(new Pose2d(-52.0, -55.5, Math.toRadians(270.0)), Math.toRadians(265.0))
-                        .resetAccelConstraint()*/
+                        .UNSTABLE_addTemporalMarkerOffset(0.2, () -> {
+                            intake.raiseIntake();
+                            intake.stopIntake();
+                        })
+
+                        .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
+                            lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                             lifter.intermediateBoxPosition(300);
+                        })
+                        .UNSTABLE_addTemporalMarkerOffset(1.8, () -> {
+                            lifter.depositMineral(0);
+                            lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+                        })
+
 
                         //DELIVER DUCK
+                        .setReversed(true)
+                        .splineToSplineHeading(redCShippingHubPose, Math.toRadians(65.0))
+                        .setReversed(false)
+
+                        .splineToSplineHeading(new Pose2d(-61.0,-33.5,Math.toRadians(270.0)),Math.toRadians(120.0))
+                        .waitSeconds(10)
                         .build();
 
 
@@ -130,6 +141,8 @@ public class RedCarouselAuto extends LinearOpMode {
         //start action
         drive.setPoseEstimate(startRedCarouselPose);
         drive.followTrajectorySequence(carouselAuto);
+
+
     }
 
     //-----------TRAJECTORIES-----------
