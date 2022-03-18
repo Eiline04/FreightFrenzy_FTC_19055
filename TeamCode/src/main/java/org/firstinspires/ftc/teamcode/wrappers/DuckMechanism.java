@@ -19,7 +19,7 @@ public class DuckMechanism {
     }
 
     public void startSpin() {
-        duckMotor.setPower(0.7);
+        duckMotor.setPower(0.6);//0.7
         running = true;
     }
 

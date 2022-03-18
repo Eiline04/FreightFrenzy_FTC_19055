@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
@@ -21,7 +20,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 
 import java.io.File;
 
-@Autonomous(name = "RedWarehouse")
+@Autonomous(name = "Red Warehouse", group = "Red Auto")
 public class RedWarehouseAuto extends LinearOpMode {
 
     MecanumDriveImpl drive;
@@ -34,10 +33,9 @@ public class RedWarehouseAuto extends LinearOpMode {
     CameraThread cameraThread;
     Lifter.LEVEL result;
 
-    static Pose2d startWareHousePose = new Pose2d(7.915, -63.54, Math.toRadians(270.0)); //x:11.6
-    static Pose2d startCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
-    static Pose2d shippingHubPose = new Pose2d(-5.83, -44.5, Math.toRadians(280.0));//x:-9.0
-    static Pose2d inWarehousePose = new Pose2d(47.0, -66.3, Math.toRadians(0.0));
+    static Pose2d startRedWareHousePose = new Pose2d(7.915, -63.54, Math.toRadians(270.0)); //x:11.6
+    static Pose2d redWShippingHubPose = new Pose2d(-5.83, -44.5, Math.toRadians(280.0));//x:-9.0
+    static Pose2d inRedWarehousePose = new Pose2d(47.0, -66.3, Math.toRadians(0.0));
 
 
     @Override
@@ -67,7 +65,7 @@ public class RedWarehouseAuto extends LinearOpMode {
         drive = new MecanumDriveImpl(hardwareMap);
 
         TrajectorySequence warehouseShippingHub =
-                drive.trajectorySequenceBuilder(startWareHousePose)
+                drive.trajectorySequenceBuilder(startRedWareHousePose)
 
                         .setVelConstraint(new TranslationalVelocityConstraint(50.00))
                         //PRELOAD
@@ -79,7 +77,7 @@ public class RedWarehouseAuto extends LinearOpMode {
                             lifter.depositMineral(0);
                             lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
                         })
-                        .lineToLinearHeading(shippingHubPose)
+                        .lineToLinearHeading(redWShippingHubPose)
                         .resetVelConstraint()
                         .build();
 
@@ -96,7 +94,7 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         updater.start(); //start calling update for intake and lifter
 
-        drive.setPoseEstimate(startWareHousePose);
+        drive.setPoseEstimate(startRedWareHousePose);
         drive.followTrajectorySequence(warehouseShippingHub);
 
         //Cycle1
@@ -116,7 +114,7 @@ public class RedWarehouseAuto extends LinearOpMode {
     TrajectorySequence park(Pose2d currPose){
        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                 .splineToSplineHeading(new Pose2d(23.3, -66.3, radians(0.0)), radians(0.0))//347
-                .splineToSplineHeading(inWarehousePose, radians(0.0))
+                .splineToSplineHeading(inRedWarehousePose, radians(0.0))
 
                 .build();
     }
@@ -152,7 +150,7 @@ public class RedWarehouseAuto extends LinearOpMode {
                     lifter.intermediateBoxPosition(300);
                 })
 
-                .splineToSplineHeading(shippingHubPose, radians(90.0))
+                .splineToSplineHeading(redWShippingHubPose, radians(90.0))
 
                 .addTemporalMarker(() -> {
                     lifter.depositMineral(0);
