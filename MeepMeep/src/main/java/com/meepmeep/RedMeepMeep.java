@@ -1,6 +1,7 @@
 package com.meepmeep;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.MeepMeep;
@@ -17,8 +18,8 @@ public class RedMeepMeep {
 
     //---------------CAROUSEL AUTO POS-----------
     static Pose2d startRedCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
-    static Pose2d redCShippingHubPose = new Pose2d(-13.0, -45.5, Math.toRadians(260.0));
     static Pose2d carouselPose = new Pose2d(-54.3, -59.0, radians(270.0));
+    static Pose2d redCThirdLevelPose = new Pose2d(-27.0, -24.0, Math.toRadians(175));
 
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(650);
@@ -47,6 +48,74 @@ public class RedMeepMeep {
                 .start();
     }
 
+    public static TrajectorySequence preloadCarousel(RoadRunnerBotEntity bot) {
+        DriveShim drive = bot.getDrive();
+
+        return drive.trajectorySequenceBuilder(startRedCarouselPose)
+                .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
+                    //duckMechanism.startSpin();
+                })
+                .lineToLinearHeading(carouselPose)
+                .waitSeconds(0.8)
+
+                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
+//                    lifter.goToPosition(100, level.level.ticks);
+//                    lifter.intermediateBoxPosition(300);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(2.2, () -> {
+//                    lifter.depositMineral(0);
+//                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(3.5, () -> {
+
+//                    intake.startIntakeVel(600);
+//                    intake.lowerIntake();
+//                    intake.releaseElements();
+//                    duckMechanism.stopSpin();
+
+                })
+
+                .setVelConstraint(new TranslationalVelocityConstraint(30.0))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-55.0, -35.0, Math.toRadians(270)), Math.toRadians(90.0))
+                .splineToSplineHeading(redCThirdLevelPose, Math.toRadians(360.0))
+                .setReversed(false)
+
+                .splineToSplineHeading(new Pose2d(-55.7, -35.0, Math.toRadians(270)), Math.toRadians(270.0))
+                .splineToSplineHeading(new Pose2d(-53.7, -47.0, Math.toRadians(300)), Math.toRadians(300))
+//---------deliverDuck
+                .setVelConstraint(new TranslationalVelocityConstraint(20))
+                .lineToLinearHeading(new Pose2d(-20.7, -54.0, Math.toRadians(255)))
+                .setVelConstraint(new TranslationalVelocityConstraint(8))
+                .setAccelConstraint(new ProfileAccelerationConstraint(15.0))
+                .lineToLinearHeading(new Pose2d(-50.0, -57.0, Math.toRadians(240.0)))
+                .lineToLinearHeading(new Pose2d(-56.0, -55.0, Math.toRadians(235.0)))
+
+                .resetVelConstraint()
+                .resetAccelConstraint()
+
+                .setReversed(true)
+                .resetVelConstraint()
+                .lineToLinearHeading(new Pose2d(-61.0, -20.0, Math.toRadians(270)))
+                .lineToLinearHeading(redCThirdLevelPose)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+//                    lifter.goToPosition(0, Lifter.LEVEL.THIRD.ticks);
+//                    lifter.intermediateBoxPosition(300);
+//                    lifter.depositMineral(600);
+//                    intake.raiseIntake();
+//                    intake.stopIntake();
+                })
+                .waitSeconds(0.5)
+                .setReversed(false)
+
+                .splineToSplineHeading(new Pose2d(-59.5, -37.3, Math.toRadians(270.0)), Math.toRadians(270.0))
+
+
+
+                .build();
+    }
+
     public static TrajectorySequence preloadWarehouse(RoadRunnerBotEntity bot) {
         DriveShim drive = bot.getDrive();
 
@@ -64,74 +133,6 @@ public class RedMeepMeep {
                 .build();
     }
 
-    public static TrajectorySequence preloadCarousel(RoadRunnerBotEntity bot) {
-        DriveShim drive = bot.getDrive();
-
-        return drive.trajectorySequenceBuilder(startRedCarouselPose)
-                //SPIN DUCK
-                .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
-                    //duckMechanism.startSpin();
-                })
-                .lineToLinearHeading(carouselPose)
-                .waitSeconds(0.8)
-
-                //DELIVER PRELOAD
-                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
-                   /* lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
-                    lifter.intermediateBoxPosition(300);*/
-                })
-                .UNSTABLE_addTemporalMarkerOffset(2.5, () -> {
-                    /*lifter.depositMineral(0);
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);*/
-                })
-
-                .UNSTABLE_addTemporalMarkerOffset(0.4, ()->{
-                    /*
-                    intake.startIntakeVel(800);
-                    intake.lowerIntake();*/
-
-                })
-
-                .setReversed(true)
-                .splineToSplineHeading(redCShippingHubPose, Math.toRadians(65.0))
-                .setReversed(false)
-
-                //COLLECT DUCK
-                .setVelConstraint(new TranslationalVelocityConstraint(20.0))
-                .splineToSplineHeading(new Pose2d(-24.8, -55.0, Math.toRadians(255.0)),Math.toRadians(180.0))
-                .setVelConstraint(new TranslationalVelocityConstraint(8.0))
-                .addTemporalMarker(()->{
-                    //duckMechanism.stopSpin();
-                })
-                .splineToSplineHeading(new Pose2d(-35.5, -56.5, Math.toRadians(240.0)), Math.toRadians(180.0))
-                .splineToSplineHeading(new Pose2d(-40.5, -55.5, Math.toRadians(250.0)), Math.toRadians(30.0))
-                .splineToSplineHeading(new Pose2d(-55.5, -53.4, Math.toRadians(240.0)), Math.toRadians(180.0))
-                .resetVelConstraint()
-
-                .addTemporalMarker(0.3,()->{
-                    /*
-                    intake reset...
-                     */
-                })
-                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
-                   /* lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
-                    lifter.intermediateBoxPosition(300);*/
-                })
-                .UNSTABLE_addTemporalMarkerOffset(2.5, () -> {
-                    /*lifter.depositMineral(0);
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);*/
-                })
-
-
-                //DELIVER DUCK
-                .setReversed(true)
-                .splineToSplineHeading(redCShippingHubPose, Math.toRadians(65.0))
-                .setReversed(false)
-
-                .splineToSplineHeading(new Pose2d(-61.5,-34.5,Math.toRadians(270.0)),Math.toRadians(120.0))
-
-                .build();
-    }
 
     public static TrajectorySequence cycles(RoadRunnerBotEntity bot, Pose2d initialPose, double xAdd, double yAdd) {
         DriveShim drive = bot.getDrive();
