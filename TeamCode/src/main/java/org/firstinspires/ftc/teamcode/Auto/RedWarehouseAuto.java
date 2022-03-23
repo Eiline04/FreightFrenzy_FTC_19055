@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Auto;
 import android.content.Context;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -34,14 +33,26 @@ public class RedWarehouseAuto extends LinearOpMode {
     Lifter.LEVEL result;
 
     static Pose2d startRedWareHousePose = new Pose2d(7.915, -63.54, Math.toRadians(270.0)); //x:11.6
-    static Pose2d redWShippingHubPose = new Pose2d(-5.83, -44.5, Math.toRadians(280.0));//x:-9.0
     static Pose2d inRedWarehousePose = new Pose2d(47.0, -66.3, Math.toRadians(0.0));
 
+    enum RedWarehouseShippingHub {
+        FIRST_LEVEL(new Pose2d(-5.83, -44.5, Math.toRadians(280.0)), Lifter.LEVEL.FIRST),
+
+        SECOND_LEVEL(new Pose2d(-5.83, -44.5, Math.toRadians(280.0)), Lifter.LEVEL.SECOND),
+
+        THIRD_LEVEL(new Pose2d(-5.83, -44.0, Math.toRadians(285.0)), Lifter.LEVEL.THIRD);
+
+        Pose2d goTo;
+        Lifter.LEVEL level;
+
+        RedWarehouseShippingHub(Pose2d goTo, Lifter.LEVEL level) {
+            this.goTo = goTo;
+            this.level = level;
+        }
+    }
 
     @Override
     public void runOpMode() {
-        //deleteCache(AppUtil.getDefContext());
-
         lifter = new Lifter(hardwareMap, telemetry);
         intake = new Intake(hardwareMap, telemetry, null);
         turret = new TapeTurret(hardwareMap);
@@ -64,23 +75,7 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         drive = new MecanumDriveImpl(hardwareMap);
 
-        TrajectorySequence warehouseShippingHub =
-                drive.trajectorySequenceBuilder(startRedWareHousePose)
-
-                        .setVelConstraint(new TranslationalVelocityConstraint(50.00))
-                        //PRELOAD
-                        .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
-                            lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
-                            lifter.intermediateBoxPosition(300);
-                        })
-                        .UNSTABLE_addTemporalMarkerOffset(0.75,() -> {
-                            lifter.depositMineral(0);
-                            lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
-                        })
-                        .lineToLinearHeading(redWShippingHubPose)
-                        .resetVelConstraint()
-                        .build();
-
+        TrajectorySequence preload;
 
         waitForStart();
 
@@ -91,35 +86,64 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         cameraThread.setState(CameraThread.CAMERA_STATE.KILL);
 
+        switch (result) {
+            case FIRST:
+                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
+                break;
+            case SECOND:
+                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.SECOND_LEVEL);
+                break;
+            default:
+                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
+                break;
+
+        }
 
         updater.start(); //start calling update for intake and lifter
 
         drive.setPoseEstimate(startRedWareHousePose);
-        drive.followTrajectorySequence(warehouseShippingHub);
+        drive.followTrajectorySequence(preload);
 
         //Cycle1
-        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0,0));
+        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0,0,0));
 
-        //Cycle2
-        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0.3,-0.1));
-
-        //Cycle3
-        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0.45,-0.15));
-
-        //Park
-        drive.followTrajectorySequence(park(drive.getPoseEstimate()));
+//        //Cycle2
+//        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0,0,0));
+//
+//        //Cycle3
+//        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), 0,0,0));
+//
+//        //Park
+//        drive.followTrajectorySequence(park(drive.getPoseEstimate()));
 
     }
 
+    TrajectorySequence preload (Pose2d starPose, RedWarehouseShippingHub level){
+        return drive.trajectorySequenceBuilder(starPose)
+                //PRELOAD
+                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
+                    lifter.goToPosition(100, level.level.ticks);
+                    lifter.intermediateBoxPosition(300);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.8,() -> {
+                    lifter.depositMineral(0);
+                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+
+                })
+                .lineToLinearHeading(level.goTo)
+                .waitSeconds(0.1)
+                .build();
+    }
+
     TrajectorySequence park(Pose2d currPose){
-       return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+       return drive.trajectorySequenceBuilder(currPose)
                 .splineToSplineHeading(new Pose2d(23.3, -66.3, radians(0.0)), radians(0.0))//347
                 .splineToSplineHeading(inRedWarehousePose, radians(0.0))
 
                 .build();
     }
 
-    TrajectorySequence cycles( Pose2d initialPose, double xAdd,double yAdd ){
+    TrajectorySequence cycles( Pose2d initialPose, double xAdd,double yAdd, double yCorrection ){
         return drive.trajectorySequenceBuilder(initialPose)
 
                 .addTemporalMarker(0.9, () -> {
@@ -127,12 +151,13 @@ public class RedWarehouseAuto extends LinearOpMode {
                     intake.lowerIntake();
                 })
 
-                .splineToSplineHeading(new Pose2d(23.3, -66.3 + yAdd, radians(0.0)), radians(0.0))//347
+//                ///THIS WORKED-----------
+//                .lineToSplineHeading(new Pose2d(10.0, -67.0, radians(0)))
+//                .splineToLinearHeading(new Pose2d(43, -67.0, radians(0.0)), radians(0.0))
+//                ///------------
 
-                //.setVelConstraint(new TranslationalVelocityConstraint(50.00))
-
-                //go to collect freight
-                .splineToSplineHeading(new Pose2d(47.0 + xAdd, -66.3), radians(0.0))
+                .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(43 + xAdd, -67.0 + yAdd, radians(0.0)), radians(0.0))
                 .waitSeconds(0.2)
 
                 //deliver freight
@@ -143,14 +168,16 @@ public class RedWarehouseAuto extends LinearOpMode {
                             intake.stopIntake();
                         }
                 )
-                .splineToSplineHeading(new Pose2d(32.0, -66.5, radians(0.0)), radians(180.0))
+
+                .splineToLinearHeading(new Pose2d(19.0, -67.0 , radians(0.0)), radians(180.0))
+
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                    lifter.goToPosition(100, RedWarehouseShippingHub.THIRD_LEVEL.level.ticks);
                     lifter.intermediateBoxPosition(300);
                 })
 
-                .splineToSplineHeading(redWShippingHubPose, radians(90.0))
+                .splineToSplineHeading(RedWarehouseShippingHub.THIRD_LEVEL.goTo, Math.toRadians(115.0))
 
                 .addTemporalMarker(() -> {
                     lifter.depositMineral(0);

@@ -1,6 +1,7 @@
 package com.meepmeep;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
@@ -29,9 +30,9 @@ public class RedMeepMeep {
                 .setConstraints(55, 55, Math.toRadians(180), Math.toRadians(180), 10.2362)
                 .setDimensions(12.59, 16.14).build();
 
-        myFirstBot.followTrajectorySequence(preloadCarousel(myFirstBot));
+        //myFirstBot.followTrajectorySequence(preloadCarousel(myFirstBot));
 
-        //myFirstBot.followTrajectorySequence(preloadWarehouse(myFirstBot));
+        myFirstBot.followTrajectorySequence(warehouse(myFirstBot, startRedWareHousePose, 0,0));
 
        /* RoadRunnerBotEntity mySecondBot = new DefaultBotBuilder(meepMeep)
                 .setConstraints(55, 55, Math.toRadians(180), Math.toRadians(180), 10.2362)
@@ -48,7 +49,62 @@ public class RedMeepMeep {
                 .start();
     }
 
-    public static TrajectorySequence preloadCarousel(RoadRunnerBotEntity bot) {
+    public static TrajectorySequence warehouse(RoadRunnerBotEntity bot, Pose2d initialPose, double xAdd, double yAdd) {
+        DriveShim drive = bot.getDrive();
+
+        return drive.trajectorySequenceBuilder(initialPose)
+                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
+                    /*lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                    lifter.intermediateBoxPosition(300);*/
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.75, () -> {
+                    /*lifter.depositMineral(0);
+                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);*/
+                })
+                .lineToLinearHeading(redWShippingHubPose)
+
+                .addTemporalMarker(0.9, () -> {
+                    /*intake.startIntake();
+                    intake.lowerIntake();*/
+                })
+
+                .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(43 + xAdd, -67.0 + yAdd, radians(0.0)), radians(0.0))
+
+                .waitSeconds(0.2)
+
+                //deliver freight
+                .resetVelConstraint()
+                .setReversed(true)
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                           /* intake.raiseIntake();
+                            intake.stopIntake();*/
+                        }
+                )
+
+                .splineToLinearHeading(new Pose2d(19.0, -67.0 , radians(0.0)), radians(180.0))
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+//                    lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+//                    lifter.intermediateBoxPosition(300);
+                })
+
+
+                //GO TO SHIPPING HUB
+                .splineToSplineHeading(redWShippingHubPose,radians(115.0))
+                //.lineToSplineHeading(redWShippingHubPose)
+
+                .addTemporalMarker(() -> {
+//                    lifter.depositMineral(0);
+//                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+                })
+                .waitSeconds(0.5)
+                .setReversed(false)
+                .resetVelConstraint()
+                .build();
+    }
+
+    public static TrajectorySequence carousel(RoadRunnerBotEntity bot) {
         DriveShim drive = bot.getDrive();
 
         return drive.trajectorySequenceBuilder(startRedCarouselPose)
@@ -116,66 +172,8 @@ public class RedMeepMeep {
                 .build();
     }
 
-    public static TrajectorySequence preloadWarehouse(RoadRunnerBotEntity bot) {
-        DriveShim drive = bot.getDrive();
-
-        return drive.trajectorySequenceBuilder(startRedWareHousePose)
-                //PRELOAD
-                .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
-                    /*lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
-                    lifter.intermediateBoxPosition(300);*/
-                })
-                .UNSTABLE_addTemporalMarkerOffset(0.75, () -> {
-                    /*lifter.depositMineral(0);
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);*/
-                })
-                .lineToLinearHeading(redWShippingHubPose)
-                .build();
-    }
 
 
-    public static TrajectorySequence cycles(RoadRunnerBotEntity bot, Pose2d initialPose, double xAdd, double yAdd) {
-        DriveShim drive = bot.getDrive();
-
-        return drive.trajectorySequenceBuilder(initialPose)
-
-                .addTemporalMarker(0.9, () -> {
-                    /*intake.startIntake();
-                    intake.lowerIntake();*/
-                })
-
-                .splineToSplineHeading(new Pose2d(23.3, -66.3 + yAdd, radians(0.0)), radians(0.0))//347
-
-                //go to collect freight
-                .splineToSplineHeading(new Pose2d(47.0 + xAdd, -66.3), radians(0.0))
-                .waitSeconds(0.2)
-
-                //deliver freight
-                .resetVelConstraint()
-                .setReversed(true)
-                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
-                          /*  intake.raiseIntake();
-                            intake.stopIntake();*/
-                        }
-                )
-                .splineToSplineHeading(new Pose2d(32.0, -66.5, radians(0.0)), radians(180.0))
-
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                   /* lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
-                    lifter.intermediateBoxPosition(300);*/
-                })
-
-                .splineToSplineHeading(redWShippingHubPose, radians(90.0))
-
-                .addTemporalMarker(() -> {
-                   /* lifter.depositMineral(0);
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);*/
-                })
-                .waitSeconds(0.5)
-                .setReversed(false)
-                .resetVelConstraint()
-                .build();
-    }
 
     static double radians(double deg) {
         return Math.toRadians(deg);
