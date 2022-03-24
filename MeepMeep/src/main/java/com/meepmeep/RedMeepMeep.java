@@ -15,7 +15,7 @@ public class RedMeepMeep {
     //--------------WAREHOUSE AUTO POS-----------
     static Pose2d startRedWareHousePose = new Pose2d(7.915, -63.54, Math.toRadians(270.0)); //x:11.6
     static Pose2d redWShippingHubPose = new Pose2d(-5.83, -44.5, Math.toRadians(280.0));//x:-9.0
-    static Pose2d inRedWarehousePose = new Pose2d(47.0, -66.3, Math.toRadians(0.0));
+    static Pose2d inRedWarehousePose = new Pose2d(47.0, -67.3, Math.toRadians(0.0));
 
     //---------------CAROUSEL AUTO POS-----------
     static Pose2d startRedCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
@@ -27,12 +27,12 @@ public class RedMeepMeep {
 
         RoadRunnerBotEntity myFirstBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(55, 55, Math.toRadians(180), Math.toRadians(180), 10.2362)
+                .setConstraints(57, 57, Math.toRadians(180), Math.toRadians(180), 10.2362)
                 .setDimensions(12.59, 16.14).build();
 
         //myFirstBot.followTrajectorySequence(preloadCarousel(myFirstBot));
 
-        myFirstBot.followTrajectorySequence(warehouse(myFirstBot, startRedWareHousePose, 0,0));
+        myFirstBot.followTrajectorySequence(warehouse(myFirstBot, startRedWareHousePose, 2, 0));
 
        /* RoadRunnerBotEntity mySecondBot = new DefaultBotBuilder(meepMeep)
                 .setConstraints(55, 55, Math.toRadians(180), Math.toRadians(180), 10.2362)
@@ -63,15 +63,18 @@ public class RedMeepMeep {
                 })
                 .lineToLinearHeading(redWShippingHubPose)
 
-                .addTemporalMarker(0.9, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
                     /*intake.startIntake();
                     intake.lowerIntake();*/
                 })
+                /*.addTemporalMarker(0.9, () -> {
+                 *//*intake.startIntake();
+                    intake.lowerIntake();*//*
+                })*/
 
                 .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
-                .splineToLinearHeading(new Pose2d(43 + xAdd, -67.0 + yAdd, radians(0.0)), radians(0.0))
-
-                .waitSeconds(0.2)
+                .splineToLinearHeading(new Pose2d(43 + xAdd, -67.0 + yAdd, radians(0.0)), radians(25.0))
+                .waitSeconds(0.1)
 
                 //deliver freight
                 .resetVelConstraint()
@@ -82,7 +85,8 @@ public class RedMeepMeep {
                         }
                 )
 
-                .splineToLinearHeading(new Pose2d(19.0, -67.0 , radians(0.0)), radians(180.0))
+                .splineToLinearHeading(new Pose2d(7.5, -67.2, radians(0.0)), radians(140.0))
+
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
 //                    lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
@@ -91,16 +95,18 @@ public class RedMeepMeep {
 
 
                 //GO TO SHIPPING HUB
-                .splineToSplineHeading(redWShippingHubPose,radians(115.0))
-                //.lineToSplineHeading(redWShippingHubPose)
+                .splineToSplineHeading(redWShippingHubPose, Math.toRadians(115.0))
 
                 .addTemporalMarker(() -> {
 //                    lifter.depositMineral(0);
 //                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
                 })
-                .waitSeconds(0.5)
                 .setReversed(false)
                 .resetVelConstraint()
+
+                //park
+//                .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
+//                .splineToLinearHeading(inRedWarehousePose, radians(0.0))
                 .build();
     }
 
@@ -168,11 +174,8 @@ public class RedMeepMeep {
                 .splineToSplineHeading(new Pose2d(-59.5, -37.3, Math.toRadians(270.0)), Math.toRadians(270.0))
 
 
-
                 .build();
     }
-
-
 
 
     static double radians(double deg) {
