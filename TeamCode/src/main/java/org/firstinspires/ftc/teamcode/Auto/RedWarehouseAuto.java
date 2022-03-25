@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Auto;
 import android.content.Context;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -40,7 +41,7 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         SECOND_LEVEL(new Pose2d(-5.83, -43.5, Math.toRadians(280.0)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-5.83, -43.0, Math.toRadians(285.0)), Lifter.LEVEL.THIRD); //y:-44.0
+        THIRD_LEVEL(new Pose2d(-5.83, -43.2, Math.toRadians(285.0)), Lifter.LEVEL.THIRD); //y:-44.0
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -77,9 +78,9 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         TrajectorySequence preload = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
         TrajectorySequence cycles = cycles(preload.end(),0,0,0);
-        TrajectorySequence secondCycle = cycles(cycles.end(),0,-0.5,0);
+        TrajectorySequence secondCycle = cycles(cycles.end(),-0.5,-0.5,0);
         TrajectorySequence thirdCycle = cycles(cycles.end(),1.0,-0.8,0);
-        TrajectorySequence fourthCycle = cycles(cycles.end(),2.0,-1,0);
+        TrajectorySequence fourthCycle = cycles(cycles.end(),1.9,-1,0);
         TrajectorySequence park = park(cycles.end());
 
         waitForStart();
@@ -110,7 +111,7 @@ public class RedWarehouseAuto extends LinearOpMode {
         drive.followTrajectorySequence(preload);
 
         //Cycle1
-        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.3,0,0));
+        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.5,0,0));
 
         //Cycle2
         drive.followTrajectorySequence(secondCycle);
@@ -123,6 +124,8 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         //Park
         drive.followTrajectorySequence(park);
+        lifter.closeBox();
+        lifter.goToPosition(50,Lifter.LEVEL.DOWN.ticks);
 
     }
 
@@ -133,9 +136,9 @@ public class RedWarehouseAuto extends LinearOpMode {
                     lifter.goToPosition(100, level.level.ticks);
                     lifter.intermediateBoxPosition(300);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.8,() -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.7,() -> {
                     lifter.depositMineral(0);
-                    lifter.goToPosition(800, Lifter.LEVEL.DOWN.ticks);
+                    lifter.goToPosition(700, Lifter.LEVEL.DOWN.ticks);
 
                 })
                 .lineToLinearHeading(level.goTo)
@@ -144,9 +147,14 @@ public class RedWarehouseAuto extends LinearOpMode {
 
     TrajectorySequence park(Pose2d currPose){
        return drive.trajectorySequenceBuilder(currPose)
-               .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
-               .splineToLinearHeading(inRedWarehousePose, radians(0.0))
-
+//               .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
+//               .splineToLinearHeading(inRedWarehousePose, radians(0.0))
+             /*  .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
+               .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(-340))*/
+               .setVelConstraint(new TranslationalVelocityConstraint(60))
+               .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
+               .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))
+               .resetVelConstraint()
                 .build();
     }
 
@@ -181,10 +189,10 @@ public class RedWarehouseAuto extends LinearOpMode {
 
                 .UNSTABLE_addTemporalMarkerOffset(0.7,() -> {
                     lifter.depositMineral(0);
-                    lifter.goToPosition(600, Lifter.LEVEL.DOWN.ticks);
+                    lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
                 })
                 .splineToSplineHeading(RedWarehouseShippingHub.THIRD_LEVEL.goTo, Math.toRadians(115.0))
-
+                .waitSeconds(0.05)
                 .setReversed(false)
                 .build();
     }

@@ -104,9 +104,12 @@ public class RedMeepMeep {
                 .setReversed(false)
                 .resetVelConstraint()
 
-                //park
-//                .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
-//                .splineToLinearHeading(inRedWarehousePose, radians(0.0))
+//                //park
+//                .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
+//                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))//-320
+
                 .build();
     }
 
