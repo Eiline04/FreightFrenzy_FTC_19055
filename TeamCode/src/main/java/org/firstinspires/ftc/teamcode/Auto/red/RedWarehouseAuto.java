@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.red;
 
 import android.content.Context;
 
@@ -76,8 +76,11 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         drive = new MecanumDriveImpl(hardwareMap);
 
-        TrajectorySequence preload = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
-        TrajectorySequence cycles = cycles(preload.end(),0,0,0);
+        TrajectorySequence preloadThird = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
+        TrajectorySequence preloadSecond = preload(startRedWareHousePose, RedWarehouseShippingHub.SECOND_LEVEL);
+        TrajectorySequence preloadFirst = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
+
+        TrajectorySequence cycles = cycles(preloadThird.end(),0,0,0);
         TrajectorySequence secondCycle = cycles(cycles.end(),-0.5,-0.5,0);
         TrajectorySequence thirdCycle = cycles(cycles.end(),1.0,-0.8,0);
         TrajectorySequence fourthCycle = cycles(cycles.end(),1.9,-1,0);
@@ -92,37 +95,37 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         cameraThread.setState(CameraThread.CAMERA_STATE.KILL);
 
+        updater.start(); //start calling update for intake and lifter
+        drive.setPoseEstimate(startRedWareHousePose);
+
+        //Preload
         switch (result) {
             case FIRST:
-                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
+                drive.followTrajectorySequence(preloadFirst);
                 break;
             case SECOND:
-                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.SECOND_LEVEL);
+                drive.followTrajectorySequence(preloadSecond);
                 break;
             default:
-                preload = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
+                drive.followTrajectorySequence(preloadThird);
                 break;
 
         }
 
-        updater.start(); //start calling update for intake and lifter
-
-        drive.setPoseEstimate(startRedWareHousePose);
-        drive.followTrajectorySequence(preload);
-
         //Cycle1
         drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.5,0,0));
-
-        //Cycle2
+//
+//        //Cycle2
         drive.followTrajectorySequence(secondCycle);
-
-        //Cycle3
+//
+//        //Cycle3
         drive.followTrajectorySequence(thirdCycle);
-
-        //Cycle4
+//
+        //to verify if there is time for that
+//        //Cycle4
         drive.followTrajectorySequence(fourthCycle);
-
-        //Park
+//
+//        //Park
         drive.followTrajectorySequence(park);
         lifter.closeBox();
         lifter.goToPosition(50,Lifter.LEVEL.DOWN.ticks);
@@ -146,20 +149,24 @@ public class RedWarehouseAuto extends LinearOpMode {
     }
 
     TrajectorySequence park(Pose2d currPose){
-       return drive.trajectorySequenceBuilder(currPose)
+        return drive.trajectorySequenceBuilder(currPose)
 //               .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
 //               .splineToLinearHeading(inRedWarehousePose, radians(0.0))
-             /*  .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
-               .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(-340))*/
-               .setVelConstraint(new TranslationalVelocityConstraint(60))
-               .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
-               .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))
-               .resetVelConstraint()
+                /*  .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
+                  .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(-340))*/
+                .setVelConstraint(new TranslationalVelocityConstraint(60))
+                .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))
+                .resetVelConstraint()
                 .build();
     }
 
     TrajectorySequence cycles( Pose2d initialPose, double xAdd,double yAdd, double yCorrection ){
         return drive.trajectorySequenceBuilder(initialPose)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.closeBox();
+                    lifter.goToPosition(50, Lifter.LEVEL.DOWN.ticks);
+                })
 
                 .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
                     intake.startIntake();

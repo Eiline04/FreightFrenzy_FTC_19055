@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Auto.RedWarehouseAuto;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;

@@ -31,7 +31,7 @@ public class Lifter {
     public static double kD = 0.0;
 
     public enum LEVEL {
-        DOWN(180), FIRST(15000), SECOND(25000), THIRD(37000); //third 35000 down 200
+        DOWN(200), FIRST(15000), SECOND(25000), THIRD(37000); //third 35000
         public int ticks;
 
         LEVEL(int ticks) {

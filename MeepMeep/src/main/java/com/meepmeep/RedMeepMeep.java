@@ -30,7 +30,7 @@ public class RedMeepMeep {
                 .setConstraints(57, 57, Math.toRadians(180), Math.toRadians(180), 10.2362)
                 .setDimensions(12.59, 16.14).build();
 
-        //myFirstBot.followTrajectorySequence(preloadCarousel(myFirstBot));
+        //myFirstBot.followTrajectorySequence(carousel(myFirstBot));
 
         myFirstBot.followTrajectorySequence(warehouse(myFirstBot, startRedWareHousePose, 2, 0));
 
