@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
@@ -19,6 +20,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
 import java.io.File;
+import java.sql.Time;
 
 @Autonomous(name = "Red Warehouse", group = "Red Auto")
 public class RedWarehouseAuto extends LinearOpMode {
@@ -32,6 +34,8 @@ public class RedWarehouseAuto extends LinearOpMode {
     OpenCvCamera webcam;
     CameraThread cameraThread;
     Lifter.LEVEL result;
+
+    ElapsedTime timer;
 
     static Pose2d startRedWareHousePose = new Pose2d(7.915, -63.54, Math.toRadians(270.0)); //x:11.6
     static Pose2d inRedWarehousePose = new Pose2d(47.0, -67.3, Math.toRadians(0.0));
@@ -60,6 +64,7 @@ public class RedWarehouseAuto extends LinearOpMode {
         duckMechanism = new DuckMechanism(hardwareMap);
 
         Thread updater = new Thread(new RedWarehouseAuto.Updater());
+        timer = new ElapsedTime();
 
         initWebcam();
         sleep(1000);
@@ -80,14 +85,15 @@ public class RedWarehouseAuto extends LinearOpMode {
         TrajectorySequence preloadSecond = preload(startRedWareHousePose, RedWarehouseShippingHub.SECOND_LEVEL);
         TrajectorySequence preloadFirst = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
 
-        TrajectorySequence cycles = cycles(preloadThird.end(),0,0,0);
-        TrajectorySequence secondCycle = cycles(cycles.end(),-0.5,-0.5,0);
-        TrajectorySequence thirdCycle = cycles(cycles.end(),1.0,-0.8,0);
-        TrajectorySequence fourthCycle = cycles(cycles.end(),1.9,-1,0);
+        TrajectorySequence cycles = cycles(preloadThird.end(), 0, 0, 0);
+        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, -0.5, 0);
+        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.0, -0.8, 0);
+        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, -1, 0);
         TrajectorySequence park = park(cycles.end());
 
         waitForStart();
 
+        timer.reset();
         //detect go brr
         result = CameraThread.getResult();
         telemetry.addData("Result", result);
@@ -113,7 +119,11 @@ public class RedWarehouseAuto extends LinearOpMode {
         }
 
         //Cycle1
-        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.5,0,0));
+        if (lifter.getLifterPosition() > 300) {
+            lifter.closeBox(300);
+            lifter.goToPosition(500, Lifter.LEVEL.DOWN.ticks);
+        }
+        drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.5, 0, 0));
 //
 //        //Cycle2
         drive.followTrajectorySequence(secondCycle);
@@ -123,45 +133,41 @@ public class RedWarehouseAuto extends LinearOpMode {
 //
         //to verify if there is time for that
 //        //Cycle4
+        if(timer.seconds() > 6.1)
         drive.followTrajectorySequence(fourthCycle);
 //
 //        //Park
         drive.followTrajectorySequence(park);
         lifter.closeBox();
-        lifter.goToPosition(50,Lifter.LEVEL.DOWN.ticks);
+        lifter.goToPosition(50, Lifter.LEVEL.DOWN.ticks);
 
     }
 
-    TrajectorySequence preload (Pose2d starPose, RedWarehouseShippingHub level){
+    TrajectorySequence preload(Pose2d starPose, RedWarehouseShippingHub level) {
         return drive.trajectorySequenceBuilder(starPose)
                 //PRELOAD
                 .UNSTABLE_addTemporalMarkerOffset(0.15, () -> {
                     lifter.goToPosition(100, level.level.ticks);
-                    lifter.intermediateBoxPosition(300);
+                    lifter.intermediateBoxPosition(500);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.7,() -> {
-                    lifter.depositMineral(0);
-                    lifter.goToPosition(700, Lifter.LEVEL.DOWN.ticks);
-
+                .addTemporalMarker(() -> {
+                    lifter.depositMineral(1100);
+                    lifter.goToPosition(1800, Lifter.LEVEL.DOWN.ticks);
                 })
                 .lineToLinearHeading(level.goTo)
                 .build();
     }
 
-    TrajectorySequence park(Pose2d currPose){
+    TrajectorySequence park(Pose2d currPose) {
         return drive.trajectorySequenceBuilder(currPose)
-//               .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
-//               .splineToLinearHeading(inRedWarehousePose, radians(0.0))
-                /*  .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
-                  .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(-340))*/
                 .setVelConstraint(new TranslationalVelocityConstraint(60))
-                .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))
+                .splineToSplineHeading(new Pose2d(8.0, -68.0, Math.toRadians(0)), Math.toRadians(300))
+                .splineToSplineHeading(new Pose2d(43.0, -68.5, radians(0)), Math.toRadians(45))
                 .resetVelConstraint()
                 .build();
     }
 
-    TrajectorySequence cycles( Pose2d initialPose, double xAdd,double yAdd, double yCorrection ){
+    TrajectorySequence cycles(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
         return drive.trajectorySequenceBuilder(initialPose)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     lifter.closeBox();
@@ -176,36 +182,40 @@ public class RedWarehouseAuto extends LinearOpMode {
 
                 .lineToSplineHeading(new Pose2d(7.9, -61.5, radians(0))) //good one!
                 .splineToLinearHeading(new Pose2d(43 + xAdd, -67.0 + yAdd, radians(0.0)), radians(25.0))
-                .waitSeconds(0.1)
+                .waitSeconds(0.08)//0.1
 
                 //deliver freight
                 .setReversed(true)
-                .UNSTABLE_addTemporalMarkerOffset(0.3,() -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                             intake.raiseIntake();
                             intake.stopIntake();
                         }
                 )
 
-                .splineToLinearHeading(new Pose2d(7.5, -67.2 , radians(0.0)), radians(  140.0))
+                .splineToLinearHeading(new Pose2d(7.5, -67.2, radians(0.0)), radians(140.0))
 
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    lifter.goToPosition(100, RedWarehouseShippingHub.THIRD_LEVEL.level.ticks);
-                    lifter.intermediateBoxPosition(300);
+                    lifter.goToPosition(300, RedWarehouseShippingHub.THIRD_LEVEL.level.ticks);
+                    lifter.intermediateBoxPosition(500);
                 })
 
-                .UNSTABLE_addTemporalMarkerOffset(0.7,() -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.7, () -> {
                     lifter.depositMineral(0);
                     lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
                 })
                 .splineToSplineHeading(RedWarehouseShippingHub.THIRD_LEVEL.goTo, Math.toRadians(115.0))
-                .waitSeconds(0.05)
                 .setReversed(false)
                 .build();
     }
 
     static double radians(double deg) {
         return Math.toRadians(deg);
+    }
+
+    void resetLifter() {
+        lifter.closeBox();
+        lifter.goToPosition(100, Lifter.LEVEL.DOWN.ticks);
     }
 
     public void initWebcam() {

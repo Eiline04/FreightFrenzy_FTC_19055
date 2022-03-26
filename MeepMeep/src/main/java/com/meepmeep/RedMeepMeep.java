@@ -105,10 +105,9 @@ public class RedMeepMeep {
                 .resetVelConstraint()
 
 //                //park
-//                .splineToSplineHeading(new Pose2d(8.0, -67.5, radians(0)),Math.toRadians(0))
-//                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(7.0, -67.0, radians(0)),Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)),Math.toRadians(10))//-320
+                .splineToSplineHeading(new Pose2d(8.0, -67.0, Math.toRadians(0)), Math.toRadians(300))
+                .splineToSplineHeading(new Pose2d(43.0, -68.0, radians(0)), Math.toRadians(45))
+
 
                 .build();
     }

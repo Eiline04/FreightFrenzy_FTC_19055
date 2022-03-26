@@ -93,7 +93,7 @@ public class Intake {
 
     public void raiseIntake() {
         intakeUp = true;
-        setIntakePosition(0.48);
+        setIntakePosition(0.5); //0.48
         releaseElements();
     }
 
