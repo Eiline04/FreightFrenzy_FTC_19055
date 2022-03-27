@@ -133,8 +133,8 @@ public class RedWarehouseAuto extends LinearOpMode {
 //
         //to verify if there is time for that
 //        //Cycle4
-        if(timer.seconds() > 6.1)
-        drive.followTrajectorySequence(fourthCycle);
+        if(timer.seconds() < 24)
+        {drive.followTrajectorySequence(fourthCycle);}
 //
 //        //Park
         drive.followTrajectorySequence(park);
@@ -161,8 +161,8 @@ public class RedWarehouseAuto extends LinearOpMode {
     TrajectorySequence park(Pose2d currPose) {
         return drive.trajectorySequenceBuilder(currPose)
                 .setVelConstraint(new TranslationalVelocityConstraint(60))
-                .splineToSplineHeading(new Pose2d(8.0, -68.0, Math.toRadians(0)), Math.toRadians(300))
-                .splineToSplineHeading(new Pose2d(43.0, -68.5, radians(0)), Math.toRadians(45))
+                .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(44, -67.0, radians(0.0)), radians(25.0))
                 .resetVelConstraint()
                 .build();
     }

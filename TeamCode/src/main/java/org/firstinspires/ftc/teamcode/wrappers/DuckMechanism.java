@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class DuckMechanism {
     private final DcMotorEx duckMotor;
     public volatile boolean running = false;
+    ////-----------------
+    public static int redSpin = 1;
 
     public DuckMechanism(HardwareMap hardwareMap) {
         duckMotor = hardwareMap.get(DcMotorEx.class, "duck");
@@ -19,7 +21,12 @@ public class DuckMechanism {
     }
 
     public void startSpin() {
-        duckMotor.setPower(0.6);//0.7
+        duckMotor.setPower(0.6 * redSpin);//0.7
+        running = true;
+    }
+
+    public void startPowSpin(double pow) {
+        duckMotor.setPower(pow * redSpin);
         running = true;
     }
 

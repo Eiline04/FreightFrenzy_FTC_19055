@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.red;
+package org.firstinspires.ftc.teamcode.Auto.blue;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.wrappers.TapeTurret;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@Autonomous(name = "Red Carousel", group = "Red Auto")
-public class RedCarouselAuto extends LinearOpMode {
+@Autonomous(name = "Blue Carousel", group = "Blue Auto")
+public class BlueCarouselAuto extends LinearOpMode {
 
     MecanumDriveImpl drive;
     Intake intake;
@@ -31,20 +31,21 @@ public class RedCarouselAuto extends LinearOpMode {
     Lifter.LEVEL result;
 
     //---------------CAROUSEL AUTO POS-----------
-    Pose2d startRedCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
-    Pose2d carouselPose = new Pose2d(-54.0, -59.0, radians(270.0));
+    static Pose2d startBlueCarouselPose = new Pose2d(-40.085, 63.54 , Math.toRadians(90.0));
+    static Pose2d blueCarouselPose = new Pose2d(-54.0, 59.0, radians(180.0));
 
-    enum RedCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-27.0, -24.0, Math.toRadians(170)), Lifter.LEVEL.FIRST),
+    //TODO modify pose
+    enum BlueCarouselShippingHub {
+        FIRST_LEVEL(new Pose2d(-28.2, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-26.95, -24.0, Math.toRadians(175)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-27.7, 24.0, Math.toRadians(190)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-26.7, -24.0, Math.toRadians(172)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-27.3, 24.0, Math.toRadians(187)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
 
-        RedCarouselShippingHub(Pose2d goTo, Lifter.LEVEL level) {
+        BlueCarouselShippingHub(Pose2d goTo, Lifter.LEVEL level) {
             this.goTo = goTo;
             this.level = level;
         }
@@ -58,7 +59,7 @@ public class RedCarouselAuto extends LinearOpMode {
         turret = new TapeTurret(hardwareMap);
         duckMechanism = new DuckMechanism(hardwareMap);
 
-        Thread updater = new Thread(new RedCarouselAuto.Updater());
+        Thread updater = new Thread(new BlueCarouselAuto.Updater());
 
         initWebcam();
         sleep(1000);
@@ -72,15 +73,15 @@ public class RedCarouselAuto extends LinearOpMode {
 
         drive = new MecanumDriveImpl(hardwareMap);
 
-        TrajectorySequence carousel = toCarousel(startRedCarouselPose);
-        TrajectorySequence preload = preload(carousel.end(), RedCarouselShippingHub.THIRD_LEVEL);
+        TrajectorySequence carousel = toCarousel(startBlueCarouselPose);
+        TrajectorySequence preload = preload(carousel.end(), BlueCarouselShippingHub.THIRD_LEVEL);
         TrajectorySequence deliverDuck = deliverDuck(preload.end());
 
         telemetry.addLine("Ready!");
         telemetry.update();
 
-        //----HANDLE DUCK SPIN---
-        DuckMechanism.redSpin = 1;
+        //--HANDLE DUCK SPIN---
+        DuckMechanism.redSpin = -1;
 
         waitForStart();
 
@@ -93,13 +94,13 @@ public class RedCarouselAuto extends LinearOpMode {
 
         switch (result) {
             case FIRST:
-                preload = preload(carousel.end(), RedCarouselShippingHub.FIRST_LEVEL);
+                preload = preload(carousel.end(), BlueCarouselShippingHub.FIRST_LEVEL);
                 break;
             case SECOND:
-                preload = preload(carousel.end(), RedCarouselShippingHub.SECOND_LEVEL);
+                preload = preload(carousel.end(), BlueCarouselShippingHub.SECOND_LEVEL);
                 break;
             default:
-                preload = preload(carousel.end(), RedCarouselShippingHub.THIRD_LEVEL);
+                preload = preload(carousel.end(), BlueCarouselShippingHub.THIRD_LEVEL);
                 break;
 
         }
@@ -107,7 +108,7 @@ public class RedCarouselAuto extends LinearOpMode {
         updater.start(); //start calling update for intake and lifter
 
         //start action
-        drive.setPoseEstimate(startRedCarouselPose);
+        drive.setPoseEstimate(startBlueCarouselPose);
         drive.followTrajectorySequence(carousel);
         drive.followTrajectorySequence(preload);
         drive.followTrajectorySequence(deliverDuck);
@@ -124,18 +125,20 @@ public class RedCarouselAuto extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
                     duckMechanism.startSpin();
                 })
-                .lineToLinearHeading(carouselPose)
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-53.0, 50.0, radians(180.0)),Math.toRadians(180))
+                .lineToLinearHeading(blueCarouselPose)
                 .waitSeconds(0.8)
                 .build();
     }
 
-    TrajectorySequence preload(Pose2d lastPose, RedCarouselShippingHub level) {
+    TrajectorySequence preload(Pose2d lastPose, BlueCarouselShippingHub level) {
         return drive.trajectorySequenceBuilder(lastPose)
                 .UNSTABLE_addTemporalMarkerOffset(1.5, () -> {
                     lifter.goToPosition(100, level.level.ticks);
                     lifter.intermediateBoxPosition(300);
                 })
-                .UNSTABLE_addTemporalMarkerOffset(2.2, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(2.5, () -> {
                     lifter.depositMineral(0);
                     lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
                 })
@@ -149,15 +152,14 @@ public class RedCarouselAuto extends LinearOpMode {
 
                 })
 
-                .setVelConstraint(new TranslationalVelocityConstraint(30.0))
-                .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-55.0, -35.0, Math.toRadians(270)), Math.toRadians(90.0))
-                .splineToSplineHeading(level.goTo, Math.toRadians(360.0))
+                .setVelConstraint(new TranslationalVelocityConstraint(35.0))
+                .splineToSplineHeading(new Pose2d(-59.0, 33.0, Math.toRadians(90)), Math.toRadians(250.0))
+                .splineToSplineHeading(level.goTo, Math.toRadians(35.0))
                 .waitSeconds(0.1)
                 .setReversed(false)
-
-                .splineToSplineHeading(new Pose2d(-57.7, -35.0, Math.toRadians(270)), Math.toRadians(270.0))
-                .splineToSplineHeading(new Pose2d(-53.7, -48.0, Math.toRadians(300)), Math.toRadians(300))
+////
+                .splineToSplineHeading(new Pose2d(-57.7, 35.0, Math.toRadians(90)), Math.toRadians(90.0))
+                .splineToSplineHeading(new Pose2d(-53.7, 48.0 , Math.toRadians(120)), Math.toRadians(120))
 
                 .build();
 
@@ -165,21 +167,21 @@ public class RedCarouselAuto extends LinearOpMode {
 
     TrajectorySequence deliverDuck(Pose2d lastPose) {
         return drive.trajectorySequenceBuilder(lastPose)
-                .setVelConstraint(new TranslationalVelocityConstraint(20))
-                .lineToLinearHeading(new Pose2d(-20.7, -54.3, Math.toRadians(250)))
+                .setVelConstraint(new TranslationalVelocityConstraint(25))
+                .lineToLinearHeading(new Pose2d(-20.7, 54.3, Math.toRadians(70)))
 
-                .setVelConstraint(new TranslationalVelocityConstraint(8))
+                .setVelConstraint(new TranslationalVelocityConstraint(13))
                 .setAccelConstraint(new ProfileAccelerationConstraint(15.0))
-                .lineToLinearHeading(new Pose2d(-50.0, -57.5, Math.toRadians(230.0)))
-                .lineToLinearHeading(new Pose2d(-53.0, -55.3, Math.toRadians(220.0)))
+                .lineToLinearHeading(new Pose2d(-50.0, 57.5, Math.toRadians(98.0)))
+                .lineToLinearHeading(new Pose2d(-53.0, 55.3, Math.toRadians(105.0)))
 
                 .resetAccelConstraint()
                 .resetVelConstraint()
 
                 .setReversed(true)
                 .resetVelConstraint()
-                .lineToLinearHeading(new Pose2d(-60.0, -24.0, Math.toRadians(270)))
-                .lineToLinearHeading(RedCarouselShippingHub.THIRD_LEVEL.goTo)
+                .lineToLinearHeading(new Pose2d(-60.0, 24.0, Math.toRadians(90)))
+                .lineToLinearHeading(BlueCarouselShippingHub.THIRD_LEVEL.goTo)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     lifter.goToPosition(0, Lifter.LEVEL.THIRD.ticks);
                     lifter.intermediateBoxPosition(300);
@@ -191,9 +193,9 @@ public class RedCarouselAuto extends LinearOpMode {
                 .waitSeconds(0.5)
                 .setReversed(false)
 
-                .splineToSplineHeading(new Pose2d(-59.0, -37.3, Math.toRadians(270.0)), Math.toRadians(270.0))
-
+                .splineToSplineHeading(new Pose2d(-59.0, 37.5, Math.toRadians(90.0)), Math.toRadians(90.0))
                 .build();
+
     }
 
     static double radians(double deg) {
@@ -215,5 +217,4 @@ public class RedCarouselAuto extends LinearOpMode {
             }
         }
     }
-
 }

@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
       <module name="killme.FtcRobotController" target="11" />
+      <module name="killme.RedMeepMeep" target="11" />
       <module name="killme.TeamCode" target="11" />
     </bytecodeTargetLevel>
   </component>

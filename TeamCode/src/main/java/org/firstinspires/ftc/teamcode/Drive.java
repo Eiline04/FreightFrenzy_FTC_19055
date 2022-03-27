@@ -112,7 +112,7 @@ public class Drive extends LinearOpMode {
             if(controller1.YOnce()){
                 if (duckMechanism.running) {
                     duckMechanism.stopSpin();
-                } else duckMechanism.startSpin();
+                } else duckMechanism.startPowSpin(0.5);
             }
 
             //--LIL' FORWARD--
@@ -228,12 +228,7 @@ public class Drive extends LinearOpMode {
 
             switch (currentMode) {
                 case DRIVER_CONTROL:
-                    double leftStickY = -controller1.left_stick_y * forward;
-                    double leftStickX = -controller1.left_stick_x * forward;
-                    double rotation = -controller1.right_stick_x;
-
-
-                    drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
+                   handleDriving();
 
                     if (controller1.XOnce() && USING_ROADRUNNER) {
                         //generate a spline and follow it
@@ -263,6 +258,29 @@ public class Drive extends LinearOpMode {
 
         PoseStorage.currentPose = new Pose2d(0,0); //reset pose storage
 
+    }
+
+    private void handleDriving() {
+        boolean leftArrow = controller1.dpadLeft();
+        boolean rightArrow = controller1.dpadRight();
+        boolean forwardArrow = controller1.dpadUp();
+        boolean backwardArrow = controller1.dpadDown();
+
+        if (leftArrow || rightArrow || forwardArrow || backwardArrow) {
+            double power = 0.7;
+            double forward = 0, strafe = 0;
+            if (leftArrow) strafe = -power;
+            if (rightArrow) strafe = power;
+            if (forwardArrow) forward = power;
+            if (backwardArrow) forward = -power;
+            drive.setDrivePower(new Pose2d(forward, strafe, 0));
+
+        } else {
+            double leftStickY = -controller1.left_stick_y;
+            double leftStickX = -controller1.left_stick_x;
+            double rotation = -controller1.right_stick_x;
+            drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
+        }
     }
 
     private void changeDirection(){
