@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
@@ -68,7 +67,7 @@ public class AutoRemote extends LinearOpMode {
         waitForStart();
 
         //detect go brr
-        result = CameraThread.getResult();
+        result = CameraThread.getRedResult();
         telemetry.addData("Result", result);
         telemetry.update();
 

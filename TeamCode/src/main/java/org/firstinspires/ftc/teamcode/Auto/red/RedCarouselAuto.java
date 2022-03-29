@@ -85,7 +85,7 @@ public class RedCarouselAuto extends LinearOpMode {
         waitForStart();
 
         //detect go brr
-        result = CameraThread.getResult();
+        result = CameraThread.getRedResult();
         telemetry.addData("Result", result);
         telemetry.update();
 

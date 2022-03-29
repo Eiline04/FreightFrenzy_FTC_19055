@@ -89,13 +89,22 @@ public class CameraThread implements Runnable {
         this.active = true;
     }
 
-    public static Lifter.LEVEL getResult() {
+    public static Lifter.LEVEL getRedResult() {
         Rect resultRect = CameraThread.detectionRect;
         if(resultRect.area() < 1000) return Lifter.LEVEL.THIRD;
         double x = resultRect.x;
         if(x >= 15 && x <= 110) return Lifter.LEVEL.FIRST;
         else if(x >= 150 && x <= 250) return Lifter.LEVEL.SECOND;
         else return Lifter.LEVEL.THIRD;
+    }
+
+    public static Lifter.LEVEL getBlueResult() {
+        Rect resultRect = CameraThread.detectionRect;
+        if(resultRect.area() < 1000) return Lifter.LEVEL.FIRST;
+        double x = resultRect.x;
+        if(x >= 0 && x <= 80) return Lifter.LEVEL.SECOND;
+        else if(x >= 80 && x <= 240) return Lifter.LEVEL.THIRD;
+        else return Lifter.LEVEL.FIRST;
     }
 
     public boolean isKilled() {

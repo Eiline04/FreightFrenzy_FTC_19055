@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Auto.red.RedWarehouseAuto;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
@@ -36,11 +35,11 @@ public class BlueWarehouseAuto extends LinearOpMode {
     static Pose2d startBlueWareHousePose = new Pose2d(7.915, 63.54, Math.toRadians(90.0));
 
     enum BlueWarehouseShippingHub {
-        FIRST_LEVEL(new Pose2d(-5.83, 44.5, Math.toRadians(80.0)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-5.9, 44.4, Math.toRadians(80.0)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-5.83, 43.5, Math.toRadians(80.0)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-5.83, 43.4, Math.toRadians(80.0)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-5.83, 43.2, Math.toRadians(85.0)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-5.83, 42.9, Math.toRadians(85.0)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -90,7 +89,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
 
         timer.reset();
         //detect go brr
-        result = CameraThread.getResult();
+        result = CameraThread.getBlueResult();
         telemetry.addData("Result", result);
         telemetry.update();
 
@@ -147,7 +146,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
                 })
                 .addTemporalMarker(() -> {
                     lifter.depositMineral(1100);
-                    lifter.goToPosition(1800, Lifter.LEVEL.DOWN.ticks);
+                    lifter.goToPosition(1900, Lifter.LEVEL.DOWN.ticks);
                 })
                 .lineToLinearHeading(level.goTo)
                 .build();
@@ -156,8 +155,12 @@ public class BlueWarehouseAuto extends LinearOpMode {
     TrajectorySequence park(Pose2d currPose) {
         return drive.trajectorySequenceBuilder(currPose)
                 .setVelConstraint(new TranslationalVelocityConstraint(60))
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
+                    intake.startIntake();
+                    intake.lowerIntake();
+                })
                 .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
-                .splineToLinearHeading(new Pose2d(43, 67.0, radians(0.0)), radians(330.0))
+                .splineToLinearHeading(new Pose2d(46, 67.0, radians(0.0)), radians(330.0))
                 .resetVelConstraint()
                 .build();
     }
