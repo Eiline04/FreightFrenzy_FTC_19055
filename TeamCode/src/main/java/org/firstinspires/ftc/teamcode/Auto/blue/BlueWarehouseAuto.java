@@ -37,9 +37,9 @@ public class BlueWarehouseAuto extends LinearOpMode {
     enum BlueWarehouseShippingHub {
         FIRST_LEVEL(new Pose2d(-5.9, 44.4, Math.toRadians(80.0)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-5.83, 43.4, Math.toRadians(80.0)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-5.83, 44.5, Math.toRadians(80.0)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-5.83, 42.9, Math.toRadians(85.0)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-5.83, 43.3, Math.toRadians(85.0)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -114,8 +114,8 @@ public class BlueWarehouseAuto extends LinearOpMode {
 
         //Cycle1
         if (lifter.getLifterPosition() > 300) {
-            lifter.closeBox(300);
-            lifter.goToPosition(500, Lifter.LEVEL.DOWN.ticks);
+            lifter.closeBox(1000);
+            lifter.goToPosition(1100, Lifter.LEVEL.DOWN.ticks);
         }
         drive.followTrajectorySequence(cycles(drive.getPoseEstimate(), -1.5, 0, 0));
 //
@@ -127,7 +127,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
 //
         //to verify if there is time for that
 //        //Cycle4
-        if(timer.seconds() > 6.1)
+        if(timer.seconds() < 23.7)
             drive.followTrajectorySequence(fourthCycle);
 //
 //        //Park
@@ -160,7 +160,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
                     intake.lowerIntake();
                 })
                 .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
-                .splineToLinearHeading(new Pose2d(46, 67.0, radians(0.0)), radians(330.0))
+                .splineToLinearHeading(new Pose2d(47.0, 67.0, radians(0.0)), radians(330.0))
                 .resetVelConstraint()
                 .build();
     }
@@ -168,8 +168,8 @@ public class BlueWarehouseAuto extends LinearOpMode {
     TrajectorySequence cycles(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
         return drive.trajectorySequenceBuilder(initialPose)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    lifter.closeBox();
-                    lifter.goToPosition(50, Lifter.LEVEL.DOWN.ticks);
+                    lifter.closeBox(300);
+                    lifter.goToPosition(400, Lifter.LEVEL.DOWN.ticks);
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
@@ -231,6 +231,5 @@ public class BlueWarehouseAuto extends LinearOpMode {
             }
         }
     }
-
 
 }
