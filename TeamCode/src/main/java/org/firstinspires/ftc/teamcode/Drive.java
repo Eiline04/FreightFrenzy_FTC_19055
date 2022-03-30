@@ -31,7 +31,7 @@ public class Drive extends LinearOpMode {
     public double baseServoPosition, angleServoPosition;
     public double deltaBase = 0.008, deltaAngle = 0.01;
 
-    private double powCoeff = 0.6;
+    private double powCoeff = 1.5;
     private double triggerPow = 0.1;
 
     private boolean virgin = true;
@@ -39,7 +39,7 @@ public class Drive extends LinearOpMode {
 
     public static final boolean USING_ROADRUNNER = true;
     Pose2d startPose = new Pose2d(-40.085, -63.54, radians(270.0));
-    Pose2d shippingHubPose = new Pose2d(-9.0 - 0.5 , -48.0 + 1.7, radians(265.0));
+    Pose2d shippingHubPose = new Pose2d(-9.0 - 0.5, -48.0 + 1.7, radians(265.0));
 
     enum Mode {
         DRIVER_CONTROL,
@@ -95,8 +95,8 @@ public class Drive extends LinearOpMode {
             ///---------1. FIRST CONTROLLER--------
 
             //--BASE END GAME auto--
-            if(controller1.AOnce() && !gamepad1.start){
-                if(lifter.getLifterPosition() < 250) {
+            if (controller1.AOnce() && !gamepad1.start) {
+                if (lifter.getLifterPosition() < 250) {
                     baseServoPosition = 0.1;
                     angleServoPosition = 0.1;
                     turret.angleServo.setPosition(0.1);
@@ -105,25 +105,29 @@ public class Drive extends LinearOpMode {
             }
 
             //--WHEEL DIRECTION--
-            if(controller1.rightBumperOnce()) {changeDirection();}
-            if(controller1.leftBumperOnce()){intakeIsFront();}
+            if (controller1.rightBumperOnce()) {
+                changeDirection();
+            }
+            if (controller1.leftBumperOnce()) {
+                intakeIsFront();
+            }
 
             //--DUCK MECHANISM--
-            if(controller1.YOnce()){
+            if (controller1.YOnce()) {
                 if (duckMechanism.running) {
                     duckMechanism.stopSpin();
                 } else duckMechanism.startPowSpin(0.5);
             }
 
             //--LIL' FORWARD--
-            if(controller1.left_trigger>0.05){
+            if (controller1.left_trigger > 0.02) {
                 triggerPow = controller1.left_trigger * powCoeff * forward;
-                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
+                drive.setMotorPowers(triggerPow, triggerPow, triggerPow, triggerPow);
             }
 
-            if(controller1.right_trigger>0.05){
-                triggerPow = controller1.right_trigger * -powCoeff * forward;
-                drive.setMotorPowers(triggerPow,triggerPow,triggerPow,triggerPow);
+            if (controller1.right_trigger > 0.02) {
+                triggerPow = controller1.right_trigger * powCoeff * -forward;
+                drive.setMotorPowers(triggerPow, triggerPow, triggerPow, triggerPow);
             }
 
             //-----------------------------------
@@ -133,10 +137,10 @@ public class Drive extends LinearOpMode {
 
             //--INTAKE--
             //Intake servos
-            if(controller2.YOnce()){
-                if(Intake.intakeUp){
+            if (controller2.YOnce()) {
+                if (Intake.intakeUp) {
                     intake.lowerIntake();
-                }else{
+                } else {
                     intake.raiseIntake();
                     intake.stopIntake(100);
                 }
@@ -144,13 +148,13 @@ public class Drive extends LinearOpMode {
 
             //Intake Motor
             if (controller2.AOnce() && !gamepad2.start) {
-                if(!Intake.intakeIsWorking){
+                if (!Intake.intakeIsWorking) {
                     intake.lowerIntake();
                     if (intake.direction == -1) {
                         intake.reverseIntake();
                     }
                     intake.startIntake(100);
-                }else intake.stopIntake();
+                } else intake.stopIntake();
             }
 
             //for shared shipping hub
@@ -159,7 +163,7 @@ public class Drive extends LinearOpMode {
                 turret.setBasePos(0.98);
                 lifter.goToPosition(100, 21500);
                 intake.setIntakePosition(0.4);
-                lifter.waitGoToBoxPosition(600,0.85);
+                lifter.waitGoToBoxPosition(600, 0.85);
                 //lifter.depositMineral(600);
                 lifter.closeBox(1200);
                 lifter.goToPosition(1500, Lifter.LEVEL.DOWN.ticks);
@@ -177,9 +181,9 @@ public class Drive extends LinearOpMode {
             double tapeRetractCoeff = 0.6;
             if (controller2.right_trigger > 0.1) {
                 //turret.startExtend();
-                turret.extender.setPower(Range.clip(controller2.right_trigger,0,1));
+                turret.extender.setPower(Range.clip(controller2.right_trigger, 0, 1));
             } else if (controller2.left_trigger > 0.1) {
-                turret.extender.setPower(Range.clip(-controller2.left_trigger,-1,0) * tapeRetractCoeff);
+                turret.extender.setPower(Range.clip(-controller2.left_trigger, -1, 0) * tapeRetractCoeff);
                 //turret.startRetract();
             } else turret.stop();
 
@@ -210,7 +214,7 @@ public class Drive extends LinearOpMode {
             }
 
             //--LIFTER--
-            if (controller2.rightBumperOnce()&& !controller2.leftBumperOnce()) {
+            if (controller2.rightBumperOnce() && !controller2.leftBumperOnce()) {
                 turret.setBasePos(0.98);
                 lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
                 lifter.intermediateBoxPosition(300);
@@ -228,7 +232,7 @@ public class Drive extends LinearOpMode {
 
             switch (currentMode) {
                 case DRIVER_CONTROL:
-                   handleDriving();
+                    handleDriving();
 
                     if (controller1.XOnce() && USING_ROADRUNNER) {
                         //generate a spline and follow it
@@ -256,7 +260,7 @@ public class Drive extends LinearOpMode {
 
         }
 
-        PoseStorage.currentPose = new Pose2d(0,0); //reset pose storage
+        PoseStorage.currentPose = new Pose2d(0, 0); //reset pose storage
 
     }
 
@@ -283,31 +287,12 @@ public class Drive extends LinearOpMode {
         }
     }
 
-    private void changeDirection(){
-        /*if (forward == -1){
-            drive.setMotorPowers(0,0,0,0);
-            MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
-            MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
-            MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.FORWARD);
-            MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);
-            forward = 1;
-        }else{
-            drive.setMotorPowers(0,0,0,0);
-            MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.FORWARD);
-            MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.FORWARD);
-            MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.REVERSE);
-            MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.REVERSE);
-            forward = -1;
-        }*/
+    private void changeDirection() {
         forward *= -1;
     }
 
-    private void intakeIsFront(){
+    private void intakeIsFront() {
         forward = 1;
-        /*MecanumDriveImpl.leftFront.setDirection(DcMotor.Direction.REVERSE);
-        MecanumDriveImpl.leftRear.setDirection(DcMotor.Direction.REVERSE);
-        MecanumDriveImpl.rightFront.setDirection(DcMotor.Direction.FORWARD);
-        MecanumDriveImpl.rightRear.setDirection(DcMotor.Direction.FORWARD);*/
     }
 
     static double radians(double deg) {
