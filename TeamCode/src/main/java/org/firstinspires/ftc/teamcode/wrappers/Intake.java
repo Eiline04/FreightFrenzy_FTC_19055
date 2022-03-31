@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -24,6 +25,8 @@ public class Intake {
     public Rev2mDistanceSensor distanceSensor;
     private volatile double rawDistance;
     public volatile boolean enableWatchdog = true;
+
+    public final double modifyIntakeServo = 0.01;
 
     public static double DISTANCE_THRESHOLD = 4; //4 // best6
     public static long WATCHDOG_DELAY = 2000; //ms
@@ -93,7 +96,7 @@ public class Intake {
 
     public void raiseIntake() {
         intakeUp = true;
-        setIntakePosition(0.5); //0.48
+        setIntakePosition(0.47); //0.48
         releaseElements();
     }
 
@@ -211,6 +214,9 @@ public class Intake {
     public void blockElements() {
         intakeServo.setPosition(0.3);
     }
+
+    public void intakeServoToRobot(){intakeServo.setPosition(Range.clip(intakeServo.getPosition() + modifyIntakeServo,0.0,1));}
+    public void intakeServoToExterior(){intakeServo.setPosition(Range.clip(intakeServo.getPosition() - modifyIntakeServo,0.0,1));}
 
     public void blockElements(long wait) {
         new Thread(() -> {

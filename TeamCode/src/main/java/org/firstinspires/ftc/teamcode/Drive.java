@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -31,8 +30,8 @@ public class Drive extends LinearOpMode {
     public double baseServoPosition, angleServoPosition;
     public double deltaBase = 0.008, deltaAngle = 0.01;
 
-    private double powCoeff = 1.5;
-    private double triggerPow = 0.1;
+    private double powCoeff = 3.00;
+    private double triggerPow;
 
     private boolean virgin = true;
     public static int forward = 1;
@@ -94,7 +93,7 @@ public class Drive extends LinearOpMode {
 
             ///---------1. FIRST CONTROLLER--------
 
-            //--BASE END GAME auto--
+           /* //--BASE END GAME auto-- NOT TO USE ANYMORE
             if (controller1.AOnce() && !gamepad1.start) {
                 if (lifter.getLifterPosition() < 250) {
                     baseServoPosition = 0.1;
@@ -102,21 +101,35 @@ public class Drive extends LinearOpMode {
                     turret.angleServo.setPosition(0.1);
                     turret.baseServo.setPosition(0.1);
                 }
-            }
+            }*/
 
             //--WHEEL DIRECTION--
             if (controller1.rightBumperOnce()) {
-                changeDirection();
+                changeRobotFront();
             }
             if (controller1.leftBumperOnce()) {
                 intakeIsFront();
+            }
+
+            //---RELEASE ELEMENTS---
+            if (controller1.AOnce()) {
+                intake.enableWatchdog = true;
+            }
+            //---MANUAL CONTROL OF INTAKE SERVO---
+            if (controller1.X()) {
+                intake.enableWatchdog = false;
+                intake.intakeServoToRobot();
+            }
+            if (controller1.B()) {
+                intake.enableWatchdog = false;
+                intake.intakeServoToExterior();
             }
 
             //--DUCK MECHANISM--
             if (controller1.YOnce()) {
                 if (duckMechanism.running) {
                     duckMechanism.stopSpin();
-                } else duckMechanism.startPowSpin(0.5);
+                } else duckMechanism.startPowSpin(0.6);
             }
 
             //--LIL' FORWARD--
@@ -130,6 +143,11 @@ public class Drive extends LinearOpMode {
                 drive.setMotorPowers(triggerPow, triggerPow, triggerPow, triggerPow);
             }
 
+
+            //-------TODO resolve the case when freight is stacked in intake
+            /*
+            if(controller1.BOnce()) intake....
+             */
             //-----------------------------------
 
 
@@ -148,6 +166,7 @@ public class Drive extends LinearOpMode {
 
             //Intake Motor
             if (controller2.AOnce() && !gamepad2.start) {
+                intake.enableWatchdog = true;
                 if (!Intake.intakeIsWorking) {
                     intake.lowerIntake();
                     if (intake.direction == -1) {
@@ -162,7 +181,7 @@ public class Drive extends LinearOpMode {
                 turret.setAnglePos(0);
                 turret.setBasePos(0.98);
                 lifter.goToPosition(100, 21500);
-                intake.setIntakePosition(0.4);
+                intake.setIntakePosition(0.48);//0.4
                 lifter.waitGoToBoxPosition(600, 0.85);
                 //lifter.depositMineral(600);
                 lifter.closeBox(1200);
@@ -177,13 +196,11 @@ public class Drive extends LinearOpMode {
             }
 
             //--TAPE MECHANISM--
-            double tapeExtendCoeff = 0.9;
-            double tapeRetractCoeff = 0.6;
-            if (controller2.right_trigger > 0.1) {
+            if (controller2.right_trigger > 0.05) {
                 //turret.startExtend();
-                turret.extender.setPower(Range.clip(controller2.right_trigger, 0, 1));
-            } else if (controller2.left_trigger > 0.1) {
-                turret.extender.setPower(Range.clip(-controller2.left_trigger, -1, 0) * tapeRetractCoeff);
+                turret.extender.setPower(controller2.right_trigger);
+            } else if (controller2.left_trigger > 0.05) {
+                turret.extender.setPower(-controller2.left_trigger);
                 //turret.startRetract();
             } else turret.stop();
 
@@ -216,10 +233,14 @@ public class Drive extends LinearOpMode {
             //--LIFTER--
             if (controller2.rightBumperOnce() && !controller2.leftBumperOnce()) {
                 turret.setBasePos(0.98);
-                lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                /*lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
                 lifter.intermediateBoxPosition(300);
                 lifter.depositMineral(600);
-                lifter.goToPosition(1600, Lifter.LEVEL.DOWN.ticks);
+                lifter.goToPosition(1600, Lifter.LEVEL.DOWN.ticks);*/
+                lifter.goToPosition(100, Lifter.LEVEL.THIRD.ticks);
+                lifter.intermediateBoxPosition(300);
+                lifter.depositMineral(500);
+                lifter.goToPosition(1200, Lifter.LEVEL.DOWN.ticks);
             }
 
             if (controller2.leftBumperOnce() && !controller2.rightBumperOnce()) {
@@ -229,8 +250,9 @@ public class Drive extends LinearOpMode {
             }
 
             //-----------------------------------
+            handleDriving();
 
-            switch (currentMode) {
+        /*    switch (currentMode) { //NOT TO USE ANYMORE
                 case DRIVER_CONTROL:
                     handleDriving();
 
@@ -256,7 +278,7 @@ public class Drive extends LinearOpMode {
                         currentMode = Mode.DRIVER_CONTROL;
                     }
                     break;
-            }
+            }*/
 
         }
 
@@ -273,21 +295,21 @@ public class Drive extends LinearOpMode {
         if (leftArrow || rightArrow || forwardArrow || backwardArrow) {
             double power = 0.7;
             double forward = 0, strafe = 0;
-            if (leftArrow) strafe = -power;
-            if (rightArrow) strafe = power;
-            if (forwardArrow) forward = power;
-            if (backwardArrow) forward = -power;
+            if (leftArrow) strafe = -power * Drive.forward;
+            if (rightArrow) strafe = power * Drive.forward;
+            if (forwardArrow) forward = power * Drive.forward;
+            if (backwardArrow) forward = -power * Drive.forward;
             drive.setDrivePower(new Pose2d(forward, strafe, 0));
 
         } else {
-            double leftStickY = -controller1.left_stick_y;
-            double leftStickX = -controller1.left_stick_x;
+            double leftStickY = -controller1.left_stick_y * Drive.forward;
+            double leftStickX = -controller1.left_stick_x * Drive.forward;
             double rotation = -controller1.right_stick_x;
             drive.setDrivePower(new Pose2d(leftStickY, leftStickX, rotation));
         }
     }
 
-    private void changeDirection() {
+    private void changeRobotFront() {
         forward *= -1;
     }
 

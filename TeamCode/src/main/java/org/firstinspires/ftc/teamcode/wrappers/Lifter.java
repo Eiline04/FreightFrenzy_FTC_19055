@@ -71,8 +71,8 @@ public class Lifter {
     }
 
     public void closeBox() {
-        dumpingBox.setPosition(0.275);
-    }
+        dumpingBox.setPosition(0.268);
+    }//0.275
 
     public void openBox(long wait) {
         new Thread(() -> {
