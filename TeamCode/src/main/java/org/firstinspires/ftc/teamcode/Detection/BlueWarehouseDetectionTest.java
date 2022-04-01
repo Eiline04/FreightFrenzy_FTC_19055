@@ -9,8 +9,8 @@ import org.opencv.core.Rect;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@TeleOp(name ="BlueDetection", group = "Detection")
-public class BlueDetectionTest extends LinearOpMode {
+@TeleOp(name ="Blue -Warehouse- Detection", group = "Detection")
+public class BlueWarehouseDetectionTest extends LinearOpMode {
 
     OpenCvCamera webcam;
     CameraThread cameraThread;
@@ -34,7 +34,7 @@ public class BlueDetectionTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            Lifter.LEVEL result = CameraThread.getBlueResult();
+            Lifter.LEVEL result = CameraThread.getBlueWarehouseResult();
             telemetry.addData("Height", result);
 
             Rect detection = CameraThread.detectionRect;

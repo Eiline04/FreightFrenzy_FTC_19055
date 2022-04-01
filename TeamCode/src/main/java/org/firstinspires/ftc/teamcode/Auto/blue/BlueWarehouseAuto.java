@@ -89,7 +89,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
 
         timer.reset();
         //detect go brr
-        result = CameraThread.getBlueResult();
+        result = CameraThread.getBlueWarehouseResult();
         telemetry.addData("Result", result);
         telemetry.update();
 
@@ -168,8 +168,8 @@ public class BlueWarehouseAuto extends LinearOpMode {
     TrajectorySequence cycles(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
         return drive.trajectorySequenceBuilder(initialPose)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    lifter.closeBox(300);
-                    lifter.goToPosition(400, Lifter.LEVEL.DOWN.ticks);
+                    lifter.closeBox(200);
+                    lifter.goToPosition(300, Lifter.LEVEL.DOWN.ticks);
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {

@@ -113,6 +113,7 @@ public class RedCarouselAuto extends LinearOpMode {
         drive.followTrajectorySequence(deliverDuck);
         lifter.closeBox();
         lifter.goToPosition(0,Lifter.LEVEL.DOWN.ticks);
+        lifter.goToPosition(150,Lifter.LEVEL.DOWN.ticks);
         sleep(5000);
 
     }

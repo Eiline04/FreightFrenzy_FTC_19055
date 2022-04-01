@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.Detection;
 
-//import com.acmerobotics.dashboard.config.Config;
-
-import com.acmerobotics.dashboard.config.Config;
-
 import org.firstinspires.ftc.teamcode.wrappers.Lifter;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -19,12 +16,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Thread that handles the webcam init and streaming for RingPipeline.
- */
-
-public class CameraThread implements Runnable {
-
+public class BlueCarouselCameraThread implements Runnable{
     public static int THRESHOLD = 109;
     public static int BLUR_KERNEL_SIZE = 9;
     //LEFT 20 - 95
@@ -41,16 +33,16 @@ public class CameraThread implements Runnable {
     }
 
     private final OpenCvCamera camera;
-    private volatile CAMERA_STATE state;
+    private volatile BlueCarouselCameraThread.CAMERA_STATE state;
     private boolean active;
     private static volatile boolean kill = false;
 
     public static volatile Rect detectionRect;
 
-    public CameraThread(OpenCvCamera camera) {
+    public BlueCarouselCameraThread(OpenCvCamera camera) {
         this.camera = camera;
         kill = false;
-        state = CAMERA_STATE.NULL;
+        state = BlueCarouselCameraThread.CAMERA_STATE.NULL;
     }
 
     @Override
@@ -58,20 +50,20 @@ public class CameraThread implements Runnable {
         //Must add isInterrupted() since it crashes when OpMode is force stopped.
         while (!kill && !Thread.currentThread().isInterrupted()) {
             if (active) {
-                if (state == CAMERA_STATE.INIT) {
+                if (state == BlueCarouselCameraThread.CAMERA_STATE.INIT) {
                     try {
                         camera.openCameraDevice();
                     } catch (OpenCvCameraException e) {
                         e.printStackTrace();
                     }
-                    camera.setPipeline(new TSEPipeline());
+                    camera.setPipeline(new BlueCarouselCameraThread.TSEPipeline());
                 }
 
-                if (state == CAMERA_STATE.STREAM) {
+                if (state == BlueCarouselCameraThread.CAMERA_STATE.STREAM) {
                     camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 }
 
-                if (state == CAMERA_STATE.KILL) {
+                if (state == BlueCarouselCameraThread.CAMERA_STATE.KILL) {
                     camera.closeCameraDevice();
                     killThread();
                 }
@@ -84,22 +76,13 @@ public class CameraThread implements Runnable {
         kill = true;
     }
 
-    public void setState(CAMERA_STATE state) {
+    public void setBlueCarouselState(BlueCarouselCameraThread.CAMERA_STATE state) {
         this.state = state;
         this.active = true;
     }
 
-    public static Lifter.LEVEL getRedResult() {
-        Rect resultRect = CameraThread.detectionRect;
-        if(resultRect.area() < 1000) return Lifter.LEVEL.THIRD;
-        double x = resultRect.x;
-        if(x >= 15 && x <= 110) return Lifter.LEVEL.FIRST;
-        else if(x >= 150 && x <= 250) return Lifter.LEVEL.SECOND;
-        else return Lifter.LEVEL.THIRD;
-    }
-
-    public static Lifter.LEVEL getBlueWarehouseResult() {
-        Rect resultRect = CameraThread.detectionRect;
+    public static Lifter.LEVEL getBlueCarouselResult() {
+        Rect resultRect = BlueCarouselCameraThread.detectionRect;
         if(resultRect.area() < 1000) return Lifter.LEVEL.FIRST;
         double x = resultRect.x;
 //        if(x >= 0 && x <= 70) return Lifter.LEVEL.SECOND;//80
@@ -134,17 +117,17 @@ public class CameraThread implements Runnable {
         double maxArea = 0, currentArea;
         int i;
 
-//        Point p1 = new Point(5, 120);
-//        Point p2 = new Point(319, 120);
-//        Point p3 = new Point(5, 239);
-//        Point p4 = new Point(319, 239);
-//        Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) (p4.x - p1.x + 1), (int) (p4.y - p1.y + 1));
+        Point p1 = new Point(2, 2);
+        Point p2 = new Point(200, 2);
+        Point p3 = new Point(2, 239);
+        Point p4 = new Point(200, 239);
+        Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) (p4.x - p1.x + 1), (int) (p4.y - p1.y + 1));
 
         @Override
         public Mat processFrame(Mat input) {
 
             //Crop the image to fit
-            //input = input.submat(rectCrop);
+            input = input.submat(rectCrop);
 
             //Convert to YCbCr
             Imgproc.cvtColor(input, YCbCr, Imgproc.COLOR_RGB2YCrCb);
@@ -176,7 +159,7 @@ public class CameraThread implements Runnable {
                     }
                 }
             }
-            detectionRect = TSE;
+            BlueCarouselCameraThread.detectionRect = TSE;
 
             Imgproc.rectangle(input, TSE, scalar, 5);
 

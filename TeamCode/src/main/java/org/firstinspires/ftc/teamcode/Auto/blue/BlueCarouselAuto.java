@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Detection.BlueCarouselCameraThread;
 import org.firstinspires.ftc.teamcode.Detection.CameraThread;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
@@ -27,11 +28,11 @@ public class BlueCarouselAuto extends LinearOpMode {
     DuckMechanism duckMechanism;
 
     OpenCvCamera webcam;
-    CameraThread cameraThread;
+    BlueCarouselCameraThread cameraThread;
     Lifter.LEVEL result;
 
     //---------------CAROUSEL AUTO POS-----------
-    static Pose2d startBlueCarouselPose = new Pose2d(-40.085, 63.54 , Math.toRadians(90.0));
+    static Pose2d startBlueCarouselPose = new Pose2d(-40.085, 63.54, Math.toRadians(90.0));
     static Pose2d blueCarouselPose = new Pose2d(-54.0, 59.0, radians(180.0));
 
     //TODO modify pose
@@ -63,13 +64,13 @@ public class BlueCarouselAuto extends LinearOpMode {
 
         initWebcam();
         sleep(1000);
-        cameraThread = new CameraThread(webcam);
+        cameraThread = new BlueCarouselCameraThread(webcam);
         Thread cameraRunner = new Thread(cameraThread);
         cameraRunner.start();
 
-        cameraThread.setState(CameraThread.CAMERA_STATE.INIT);
+        cameraThread.setBlueCarouselState(BlueCarouselCameraThread.CAMERA_STATE.INIT);
         sleep(1000);
-        cameraThread.setState(CameraThread.CAMERA_STATE.STREAM);
+        cameraThread.setBlueCarouselState(BlueCarouselCameraThread.CAMERA_STATE.STREAM);
 
         drive = new MecanumDriveImpl(hardwareMap);
 
@@ -86,11 +87,11 @@ public class BlueCarouselAuto extends LinearOpMode {
         waitForStart();
 
         //detect go brr
-        result = CameraThread.getBlueResult();
+        result = BlueCarouselCameraThread.getBlueCarouselResult();
         telemetry.addData("Result", result);
         telemetry.update();
 
-        cameraThread.setState(CameraThread.CAMERA_STATE.KILL);
+        cameraThread.setBlueCarouselState(BlueCarouselCameraThread.CAMERA_STATE.KILL);
 
         switch (result) {
             case FIRST:
@@ -113,7 +114,8 @@ public class BlueCarouselAuto extends LinearOpMode {
         drive.followTrajectorySequence(preload);
         drive.followTrajectorySequence(deliverDuck);
         lifter.closeBox();
-        lifter.goToPosition(0,Lifter.LEVEL.DOWN.ticks);
+        lifter.goToPosition(0, Lifter.LEVEL.DOWN.ticks);
+        lifter.goToPosition(150, Lifter.LEVEL.DOWN.ticks);
         sleep(5000);
 
     }
@@ -126,7 +128,7 @@ public class BlueCarouselAuto extends LinearOpMode {
                     duckMechanism.startSpin();
                 })
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-53.0, 50.0, radians(180.0)),Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-53.0, 50.0, radians(180.0)), Math.toRadians(180))
                 .lineToLinearHeading(blueCarouselPose)
                 .waitSeconds(0.8)
                 .build();
@@ -159,7 +161,7 @@ public class BlueCarouselAuto extends LinearOpMode {
                 .setReversed(false)
 ////
                 .splineToSplineHeading(new Pose2d(-57.7, 35.0, Math.toRadians(90)), Math.toRadians(90.0))
-                .splineToSplineHeading(new Pose2d(-53.7, 48.0 , Math.toRadians(120)), Math.toRadians(120))
+                .splineToSplineHeading(new Pose2d(-53.7, 48.0, Math.toRadians(120)), Math.toRadians(120))
 
                 .build();
 
