@@ -80,9 +80,9 @@ public class BlueWarehouseAuto extends LinearOpMode {
         TrajectorySequence preloadFirst = preload(startBlueWareHousePose, BlueWarehouseShippingHub.FIRST_LEVEL);
 
         TrajectorySequence cycles = cycles(preloadThird.end(), 0, 0, 0);
-        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, 0.5, 0);
-        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.0, 0.8, 0);
-        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, 1, 0);
+        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, 0.3, 0);
+        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.2, 0.4, 0);
+        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, 0.5, 0);
         TrajectorySequence park = park(cycles.end());
 
         waitForStart();
@@ -190,7 +190,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
                         }
                 )
 
-                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(270.0))
+                .splineToLinearHeading(new Pose2d(7, 68, radians(0.0)), radians(230.0))
 
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {

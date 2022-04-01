@@ -32,12 +32,12 @@ public class RedCarouselAuto extends LinearOpMode {
 
     //---------------CAROUSEL AUTO POS-----------
     Pose2d startRedCarouselPose = new Pose2d(-40.085, -63.54, Math.toRadians(270.0));
-    Pose2d carouselPose = new Pose2d(-54.0, -59.0, radians(270.0));
+    Pose2d carouselPose = new Pose2d(-54.5, -59.0, radians(270.0));
 
     enum RedCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-27.0, -24.0, Math.toRadians(170)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-27.9, -24.0, Math.toRadians(170)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-26.95, -24.0, Math.toRadians(175)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-27.1, -24.0, Math.toRadians(175)), Lifter.LEVEL.SECOND),
 
         THIRD_LEVEL(new Pose2d(-26.7, -24.0, Math.toRadians(172)), Lifter.LEVEL.THIRD);
 
@@ -192,7 +192,7 @@ public class RedCarouselAuto extends LinearOpMode {
                 .waitSeconds(0.5)
                 .setReversed(false)
 
-                .splineToSplineHeading(new Pose2d(-59.0, -37.3, Math.toRadians(270.0)), Math.toRadians(270.0))
+                .splineToSplineHeading(new Pose2d(-59.0, -36.5, Math.toRadians(270.0)), Math.toRadians(270.0))
 
                 .build();
     }

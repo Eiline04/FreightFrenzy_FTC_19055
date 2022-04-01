@@ -40,11 +40,11 @@ public class RedWarehouseAuto extends LinearOpMode {
     static Pose2d inRedWarehousePose = new Pose2d(47.0, -67.3, Math.toRadians(0.0));
 
     enum RedWarehouseShippingHub {
-        FIRST_LEVEL(new Pose2d(-5.83, -43.6, Math.toRadians(287.0)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-5.83, -44.5, Math.toRadians(287.0)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-5.83, -43.4, Math.toRadians(285.0)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-5.83, -44.3, Math.toRadians(285.0)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-5.83, -43.2, Math.toRadians(285.0)), Lifter.LEVEL.THIRD); //y:-44.0
+        THIRD_LEVEL(new Pose2d(-5.83, -43.8, Math.toRadians(285.0)), Lifter.LEVEL.THIRD); //y:-44.0
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -85,9 +85,9 @@ public class RedWarehouseAuto extends LinearOpMode {
         TrajectorySequence preloadFirst = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
 
         TrajectorySequence cycles = cycles(preloadThird.end(), 0, 0, 0);
-        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, -0.5, 0);
-        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.0, -0.8, 0);
-        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, -1, 0);
+        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, -0.8, 0);
+        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.0, -1.3, 0);
+        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, -1.7, 0);
         TrajectorySequence park = park(cycles.end());
 
         waitForStart();
@@ -165,7 +165,7 @@ public class RedWarehouseAuto extends LinearOpMode {
                     intake.lowerIntake();
                 })
                 .lineToSplineHeading(new Pose2d(8.0, -61.5, radians(0))) //good one!
-                .splineToLinearHeading(new Pose2d(47.0, -67.0, radians(0.0)), radians(25.0))
+                .splineToLinearHeading(new Pose2d(47.0, -67.5, radians(0.0)), radians(25.0))
                 .resetVelConstraint()
                 .build();
     }

@@ -37,7 +37,7 @@ public class BlueCarouselAuto extends LinearOpMode {
 
     //TODO modify pose
     enum BlueCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-28.8, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-29.2, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
 
         SECOND_LEVEL(new Pose2d(-28.6, 24.0, Math.toRadians(190)), Lifter.LEVEL.SECOND),
 

@@ -102,7 +102,7 @@ public class RedMeepMeep {
                         }
                 )
 
-                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(270.0))
+                .splineToLinearHeading(new Pose2d(8, 68, radians(0.0)), radians(230.0))
 
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
