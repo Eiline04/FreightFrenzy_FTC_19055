@@ -112,7 +112,7 @@ public class Drive extends LinearOpMode {
             }
 
             //---RELEASE ELEMENTS---
-            if (controller1.AOnce()) {
+            if (controller1.AOnce() && !gamepad1.start) {
                 intake.enableWatchdog = true;
             }
             //---MANUAL CONTROL OF INTAKE SERVO---

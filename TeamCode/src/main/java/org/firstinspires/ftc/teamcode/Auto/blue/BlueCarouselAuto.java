@@ -33,15 +33,15 @@ public class BlueCarouselAuto extends LinearOpMode {
 
     //---------------CAROUSEL AUTO POS-----------
     static Pose2d startBlueCarouselPose = new Pose2d(-40.085, 63.54, Math.toRadians(90.0));
-    static Pose2d blueCarouselPose = new Pose2d(-54.0, 59.0, radians(180.0));
+    static Pose2d blueCarouselPose = new Pose2d(-54.3, 59.5, radians(180.0));
 
     //TODO modify pose
     enum BlueCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-28.2, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-28.8, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-27.7, 24.0, Math.toRadians(190)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-28.6, 24.0, Math.toRadians(190)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-27.3, 24.0, Math.toRadians(187)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-28.2, 24.0, Math.toRadians(187)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -128,7 +128,7 @@ public class BlueCarouselAuto extends LinearOpMode {
                     duckMechanism.startSpin();
                 })
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(-53.0, 50.0, radians(180.0)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-53.0, 55.0, radians(180.0)), Math.toRadians(180))
                 .lineToLinearHeading(blueCarouselPose)
                 .waitSeconds(0.8)
                 .build();
@@ -195,7 +195,7 @@ public class BlueCarouselAuto extends LinearOpMode {
                 .waitSeconds(0.5)
                 .setReversed(false)
 
-                .splineToSplineHeading(new Pose2d(-59.0, 37.5, Math.toRadians(90.0)), Math.toRadians(90.0))
+                .splineToSplineHeading(new Pose2d(-60.5, 38.6, Math.toRadians(90.0)), Math.toRadians(90.0))
                 .build();
 
     }
