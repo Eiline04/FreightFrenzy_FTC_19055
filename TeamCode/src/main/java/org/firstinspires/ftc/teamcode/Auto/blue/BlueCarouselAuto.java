@@ -37,11 +37,11 @@ public class BlueCarouselAuto extends LinearOpMode {
 
     //TODO modify pose
     enum BlueCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-29.2, 24.0, Math.toRadians(185)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-30.2, 24.2, Math.toRadians(185)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-28.6, 24.0, Math.toRadians(190)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-29.5, 24.2, Math.toRadians(190)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-28.2, 24.0, Math.toRadians(187)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-29.0, 24.2, Math.toRadians(187)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -174,8 +174,8 @@ public class BlueCarouselAuto extends LinearOpMode {
 
                 .setVelConstraint(new TranslationalVelocityConstraint(13))
                 .setAccelConstraint(new ProfileAccelerationConstraint(15.0))
-                .lineToLinearHeading(new Pose2d(-50.0, 57.5, Math.toRadians(98.0)))
-                .lineToLinearHeading(new Pose2d(-53.0, 55.3, Math.toRadians(105.0)))
+                .lineToLinearHeading(new Pose2d(-52.0, 56.0, Math.toRadians(98.0)))
+                .lineToLinearHeading(new Pose2d(-54.0, 55.3, Math.toRadians(105.0)))
 
                 .resetAccelConstraint()
                 .resetVelConstraint()

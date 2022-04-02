@@ -37,9 +37,9 @@ public class RedCarouselAuto extends LinearOpMode {
     enum RedCarouselShippingHub {
         FIRST_LEVEL(new Pose2d(-27.9, -24.0, Math.toRadians(170)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-27.1, -24.0, Math.toRadians(175)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-27.0, -24.0, Math.toRadians(175)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-26.7, -24.0, Math.toRadians(172)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-26.2, -24.0, Math.toRadians(172)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -110,6 +110,12 @@ public class RedCarouselAuto extends LinearOpMode {
         drive.setPoseEstimate(startRedCarouselPose);
         drive.followTrajectorySequence(carousel);
         drive.followTrajectorySequence(preload);
+
+        //HANDLE LIFTER
+        lifter.closeBox(200);
+        lifter.goToPosition(350,Lifter.LEVEL.DOWN.ticks);
+
+        //COLLECT DUCK
         drive.followTrajectorySequence(deliverDuck);
         lifter.closeBox();
         lifter.goToPosition(0,Lifter.LEVEL.DOWN.ticks);
@@ -137,8 +143,9 @@ public class RedCarouselAuto extends LinearOpMode {
                     lifter.intermediateBoxPosition(300);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(2.2, () -> {
+                    intake.setIntakePosition(0.43);
                     lifter.depositMineral(0);
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+                    lifter.goToPosition(1200, Lifter.LEVEL.DOWN.ticks);
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(3.5, () -> {
@@ -184,8 +191,8 @@ public class RedCarouselAuto extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     lifter.goToPosition(0, Lifter.LEVEL.THIRD.ticks);
                     lifter.intermediateBoxPosition(300);
-                    lifter.depositMineral(500);//600
-                    lifter.goToPosition(1000, Lifter.LEVEL.DOWN.ticks);
+                    lifter.depositMineral(600);//600
+                    lifter.goToPosition(1200, Lifter.LEVEL.DOWN.ticks);
                     intake.raiseIntake();
                     intake.stopIntake();
                 })
