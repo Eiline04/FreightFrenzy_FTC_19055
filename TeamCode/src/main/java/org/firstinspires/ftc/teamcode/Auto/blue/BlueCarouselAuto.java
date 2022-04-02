@@ -37,11 +37,11 @@ public class BlueCarouselAuto extends LinearOpMode {
 
     //TODO modify pose
     enum BlueCarouselShippingHub {
-        FIRST_LEVEL(new Pose2d(-30.2, 24.2, Math.toRadians(185)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-30.7, 24.2, Math.toRadians(185)), Lifter.LEVEL.FIRST),
 
-        SECOND_LEVEL(new Pose2d(-29.5, 24.2, Math.toRadians(190)), Lifter.LEVEL.SECOND),
+        SECOND_LEVEL(new Pose2d(-30.6, 24.2, Math.toRadians(190)), Lifter.LEVEL.SECOND),
 
-        THIRD_LEVEL(new Pose2d(-29.0, 24.2, Math.toRadians(187)), Lifter.LEVEL.THIRD);
+        THIRD_LEVEL(new Pose2d(-30.3, 24.2, Math.toRadians(187)), Lifter.LEVEL.THIRD);
 
         Pose2d goTo;
         Lifter.LEVEL level;
@@ -170,7 +170,7 @@ public class BlueCarouselAuto extends LinearOpMode {
     TrajectorySequence deliverDuck(Pose2d lastPose) {
         return drive.trajectorySequenceBuilder(lastPose)
                 .setVelConstraint(new TranslationalVelocityConstraint(25))
-                .lineToLinearHeading(new Pose2d(-20.7, 54.3, Math.toRadians(70)))
+                .lineToLinearHeading(new Pose2d(-25.7, 54.3, Math.toRadians(70)))
 
                 .setVelConstraint(new TranslationalVelocityConstraint(13))
                 .setAccelConstraint(new ProfileAccelerationConstraint(15.0))
