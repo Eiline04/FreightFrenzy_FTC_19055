@@ -31,7 +31,7 @@ public class Lifter {
     public static double kD = 0.0;
 
     public enum LEVEL {
-        DOWN(100), FIRST(15000), SECOND(25000), THIRD(37000); //third 35000 down 150
+        DOWN(0), FIRST(15000), SECOND(25000), THIRD(37000); //third 35000 down 100
         public int ticks;
 
         LEVEL(int ticks) {
@@ -71,8 +71,8 @@ public class Lifter {
     }
 
     public void closeBox() {
-        dumpingBox.setPosition(0.268);
-    }//0.275
+        dumpingBox.setPosition(0.1);
+    }//0.275//0.268
 
     public void openBox(long wait) {
         new Thread(() -> {

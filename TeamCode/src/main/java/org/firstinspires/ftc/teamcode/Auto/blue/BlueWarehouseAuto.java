@@ -75,14 +75,17 @@ public class BlueWarehouseAuto extends LinearOpMode {
 
         drive = new MecanumDriveImpl(hardwareMap);
 
+        //--HANDLE DUCK SPIN---
+        DuckMechanism.redSpin = -1;
+
         TrajectorySequence preloadThird = preload(startBlueWareHousePose, BlueWarehouseShippingHub.THIRD_LEVEL);
         TrajectorySequence preloadSecond = preload(startBlueWareHousePose, BlueWarehouseShippingHub.SECOND_LEVEL);
         TrajectorySequence preloadFirst = preload(startBlueWareHousePose, BlueWarehouseShippingHub.FIRST_LEVEL);
 
         TrajectorySequence cycles = cycles(preloadThird.end(), 0, 0, 0);
-        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, 0.3, 0);
-        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.2, 0.4, 0);
-        TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, 0.5, 0);
+        TrajectorySequence secondCycle = secondCycle(cycles.end(), -0.4, 0.3, 0);
+        TrajectorySequence thirdCycle = thirdCycle(cycles.end(), 1.3, 0.4, 0);
+        TrajectorySequence fourthCycle = fourthCycle(cycles.end(), 1.9, 0.5, 0);
         TrajectorySequence park = park(cycles.end());
 
         waitForStart();
@@ -127,7 +130,7 @@ public class BlueWarehouseAuto extends LinearOpMode {
 //
         //to verify if there is time for that
 //        //Cycle4
-        if(timer.seconds() < 23.7)
+        if(timer.seconds() < 20.0)
             drive.followTrajectorySequence(fourthCycle);
 //
 //        //Park
@@ -178,11 +181,25 @@ public class BlueWarehouseAuto extends LinearOpMode {
                 })
 
 
+//                .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
+//                .splineToLinearHeading(new Pose2d(43 + xAdd, 67.0 + yAdd, radians(0.0)), radians(330.0))
+//                .waitSeconds(0.08)
+//
+//                //deliver freight
+//                .setReversed(true)
+//                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+//                            intake.raiseIntake();
+//                            intake.stopIntake();
+//                        }
+//                )
+//
+//                .splineToLinearHeading(new Pose2d(8, 66, radians(0.0)), radians(230.0))
                 .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
                 .splineToLinearHeading(new Pose2d(43 + xAdd, 67.0 + yAdd, radians(0.0)), radians(330.0))
-                .waitSeconds(0.08)
-
-                //deliver freight
+                .waitSeconds(0.1)
+//
+//                //deliver freight
+                .resetVelConstraint()
                 .setReversed(true)
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
                             intake.raiseIntake();
@@ -190,12 +207,12 @@ public class BlueWarehouseAuto extends LinearOpMode {
                         }
                 )
 
-                .splineToLinearHeading(new Pose2d(7, 68, radians(0.0)), radians(230.0))
+                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(210.0))//230
 
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    lifter.goToPosition(300, BlueWarehouseShippingHub.THIRD_LEVEL.level.ticks);
-                    lifter.intermediateBoxPosition(500);
+                    lifter.goToPosition(300, BlueWarehouseShippingHub.THIRD_LEVEL.level.ticks); //300
+                    lifter.intermediateBoxPosition(500);//500
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(0.7, () -> {
@@ -203,6 +220,132 @@ public class BlueWarehouseAuto extends LinearOpMode {
                     lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
                 })
                 .splineToSplineHeading(BlueWarehouseShippingHub.THIRD_LEVEL.goTo, Math.toRadians(270.0))//30
+                .setReversed(false)
+                .build();
+    }
+
+    TrajectorySequence secondCycle(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
+        return drive.trajectorySequenceBuilder(initialPose)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.closeBox(200);
+                    lifter.goToPosition(300, Lifter.LEVEL.DOWN.ticks);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
+                    intake.startIntake();
+                    intake.lowerIntake();
+                })
+
+                .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(43 + xAdd, 67.0 + yAdd, radians(0.0)), radians(330.0))
+                .waitSeconds(0.1)
+
+//                //deliver freight
+                .resetVelConstraint()
+                .setReversed(true)
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                            intake.raiseIntake();
+                            intake.stopIntake();
+                        }
+                )
+
+                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(210.0))//230
+
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.goToPosition(300, BlueWarehouseShippingHub.THIRD_LEVEL.level.ticks); //300
+                    lifter.intermediateBoxPosition(500);//500
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.7, () -> {
+                    lifter.depositMineral(0);
+                    lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
+                })
+                .splineToSplineHeading(new Pose2d(1, 38.0, Math.toRadians(85.0)), Math.toRadians(270.0))//30
+                .setReversed(false)
+                .build();
+    }
+
+    TrajectorySequence thirdCycle(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
+        return drive.trajectorySequenceBuilder(initialPose)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.closeBox(200);
+                    lifter.goToPosition(300, Lifter.LEVEL.DOWN.ticks);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
+                    intake.startIntake();
+                    intake.lowerIntake();
+                })
+
+                .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(43 + xAdd, 67.0 + yAdd, radians(0.0)), radians(330.0))
+                .waitSeconds(0.1)
+
+//                //deliver freight
+                .resetVelConstraint()
+                .setReversed(true)
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                            intake.raiseIntake();
+                            intake.stopIntake();
+                        }
+                )
+
+                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(210.0))//230
+
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.goToPosition(300, BlueWarehouseShippingHub.THIRD_LEVEL.level.ticks); //300
+                    lifter.intermediateBoxPosition(500);//500
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.7, () -> {
+                    lifter.depositMineral(0);
+                    lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
+                })
+                .splineToSplineHeading(new Pose2d(4.0, 37.3, Math.toRadians(85.0)), Math.toRadians(270.0))//30
+                .setReversed(false)
+                .build();
+    }
+
+    TrajectorySequence fourthCycle(Pose2d initialPose, double xAdd, double yAdd, double yCorrection) {
+        return drive.trajectorySequenceBuilder(initialPose)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.closeBox(200);
+                    lifter.goToPosition(300, Lifter.LEVEL.DOWN.ticks);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.9, () -> {
+                    intake.startIntake();
+                    intake.lowerIntake();
+                })
+
+                .lineToSplineHeading(new Pose2d(8.0, 61.5, radians(0))) //good one!
+                .splineToLinearHeading(new Pose2d(43 + xAdd, 67.0 + yAdd, radians(0.0)), radians(330.0))
+                .waitSeconds(0.1)
+
+//                //deliver freight
+                .resetVelConstraint()
+                .setReversed(true)
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> {
+                            intake.raiseIntake();
+                            intake.stopIntake();
+                        }
+                )
+
+                .splineToLinearHeading(new Pose2d(7.5, 67.2, radians(0.0)), radians(210.0))//230
+
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    lifter.goToPosition(300, BlueWarehouseShippingHub.THIRD_LEVEL.level.ticks); //300
+                    lifter.intermediateBoxPosition(500);//500
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.7, () -> {
+                    lifter.depositMineral(0);
+                    lifter.goToPosition(650, Lifter.LEVEL.DOWN.ticks);
+                })
+                .splineToSplineHeading(new Pose2d(8.0, 35.0, Math.toRadians(85.0)), Math.toRadians(270.0))//30
                 .setReversed(false)
                 .build();
     }

@@ -40,7 +40,7 @@ public class RedWarehouseAuto extends LinearOpMode {
     static Pose2d inRedWarehousePose = new Pose2d(47.0, -67.3, Math.toRadians(0.0));
 
     enum RedWarehouseShippingHub {
-        FIRST_LEVEL(new Pose2d(-5.83, -44.5, Math.toRadians(287.0)), Lifter.LEVEL.FIRST),
+        FIRST_LEVEL(new Pose2d(-5.83, -45.1, Math.toRadians(287.0)), Lifter.LEVEL.FIRST),
 
         SECOND_LEVEL(new Pose2d(-5.83, -44.3, Math.toRadians(285.0)), Lifter.LEVEL.SECOND),
 
@@ -80,13 +80,16 @@ public class RedWarehouseAuto extends LinearOpMode {
 
         drive = new MecanumDriveImpl(hardwareMap);
 
+        //----HANDLE DUCK SPIN---
+        DuckMechanism.redSpin = 1;
+
         TrajectorySequence preloadThird = preload(startRedWareHousePose, RedWarehouseShippingHub.THIRD_LEVEL);
         TrajectorySequence preloadSecond = preload(startRedWareHousePose, RedWarehouseShippingHub.SECOND_LEVEL);
         TrajectorySequence preloadFirst = preload(startRedWareHousePose, RedWarehouseShippingHub.FIRST_LEVEL);
 
         TrajectorySequence cycles = cycles(preloadThird.end(), 0, 0, 0);
-        TrajectorySequence secondCycle = cycles(cycles.end(), -0.5, -0.8, 0);
-        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.0, -1.3, 0);
+        TrajectorySequence secondCycle = cycles(cycles.end(), 1, -0.8, 0);
+        TrajectorySequence thirdCycle = cycles(cycles.end(), 1.6, -1.3, 0);
         TrajectorySequence fourthCycle = cycles(cycles.end(), 1.9, -1.7, 0);
         TrajectorySequence park = park(cycles.end());
 
@@ -132,8 +135,8 @@ public class RedWarehouseAuto extends LinearOpMode {
 //
         //to verify if there is time for that
 //        //Cycle4
-        if(timer.seconds() < 23.7)
-        {drive.followTrajectorySequence(fourthCycle);}
+//        if(timer.seconds() < 22.5)
+//        {drive.followTrajectorySequence(fourthCycle);}
 //
 //        //Park
         drive.followTrajectorySequence(park);
